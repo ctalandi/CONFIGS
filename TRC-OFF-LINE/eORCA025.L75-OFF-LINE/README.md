@@ -1,6 +1,6 @@
 # eORCA025.L75-OFF-LINE configuration
 Gather here all required files to be able to run this configuration. <br>
-It has been nuilt from the eORCA025.L75-IMHOTEP.GAI configuration but with our own pasive tracer.<br>
+It has been built from the eORCA025.L75-IMHOTEP.GAI configuration but with our own pasive tracer.<br>
 
 0 - GENERAL INFORMATION:<br>
 1 - DCM + NEMO CODE & XIOS:<br>
@@ -27,7 +27,7 @@ JobID           JobName  Partition      State  Timelimit               Start    
 205350.0     ztask_fil+             COMPLETED            2023-06-22T11:20:09 2023-06-22T11:25:44   00:05:35       36       2880 r1i0n[5-6,22,3+
 ```
 5.68  x 36 nodes x 40 cores =  8179.2'  ~136.32 hCPus elapsed for 31 days <br>
-This leads to == 1605 hCpus elapsed time for 1-year long simulation==.  <br>
+This leads to __1605 hCpus elapsed time for 1-year long simulation__.  <br>
 
 ### 0.2 OFF-LINE CODE CALLING SEQUENCE:
 General information on the calling subroutine sequence into the code to better understand the key steps.<br>
@@ -43,7 +43,7 @@ Calling tree of the Off-line:<br>
 ```
 nemogcm.F90 
 	- nemo_init() 
-			- dta_dyn_init()  rebuild e3x with sshn() & sshb() fields read in restart file. read hdiv & empb in restart file 
+		- dta_dyn_init()  rebuild e3x with sshn() & sshb() fields read in restart file. read hdiv & empb in restart file 
 	- Time loop
 		- dta_dyn(istp)
 			- read all required fields  among which 2D emp_b and 3D horizontal divergence
@@ -88,7 +88,6 @@ Then to switch to a specific commit or tag or whatever hereafter it relies on th
 cd DCM_4.0
 commit=f6983d83c6ebfd3c766b47b78aa21ab40eaacb87
 git checkout $commit
-
 ```
 
 Then download the corresponding NEMO code revision:<br>
@@ -115,7 +114,6 @@ export PDIR=$HOME/RUNS/
 export CDIR=$WORK
 export SDIR=$STORE
 export DDIR=$SCRATCH
-
 ```
 
 ### 1.2  XIOS library :
@@ -133,7 +131,6 @@ The corresponding revision was 2503: <br>
 ```
 cd xios-2.5
 ./make_xios --full --arch X64_JEANZAY -j 64
-
 ```
 
 Then the path to access to  this library has to be set into the includefile.sh  through the  P_XIOS_DIR variable: /gpfswork/rech/hjl/rost832/XIOS/xios-2.5 . <br>
@@ -168,12 +165,10 @@ NCOMPIL_PROC = 64
 
 TOP = 'use'
 OFF = 'use'
-
 ```
 Then copy also file in which all compilationn options are set [./CODE/ARCH/X64_JEANZAY_jm.fcm](./CODE/ARCH/X64_JEANZAY_jm.fcm) :<br>
 ```
 cp /linkhome/rech/genlop01/rost832/CONFIGS/CONFIG_eORCA025.L75-OFF/eORCA025.L75-OFF-RUN1/arch-X64_JEANZAY_jm.fcm ./arch/.
-
 ```
 
 Ensure that the proper libraires and tools listed in [./CODE/B4_COMPILATION.txt](./CODE/B4_COMPILATION.txt) are loaded: <br>
@@ -186,7 +181,6 @@ module load netcdf-fortran/4.5.2-mpi
 module load ncview/2.1.8
 module load nco/4.9.3
 module load DCM/4.0.6
-
 ```
 
 Then copy all specific F90 modules used for the eORCA025.L75-IMHOTEP.GAI configuration localy: <br>
@@ -282,7 +276,6 @@ Les sources sont dans /linkhome/rech/genlgg01/rcli002/CONFIGS/CONFIG_eORCA025.L7
 Claude, qui comprendra ( ;) ), ces sources utilisent le DCM/4.0.6  au commit f6983d83c6ebfd3c766b47b78aa21ab40eaacb87 sur GitHub.Le repertoire de 
 contole de ce run (où on retrouve toutes les infos necessaires pour faire tourner la configuration ) est :
 /gpfswork/rech/cli/rcli002/RUNS/RUN_eORCA025.L75/eORCA025.L75-IMHOTEP.GAI/CTL/
-
 ```
 
 To download a specific commit from a git repository using a hashtag: <br>
@@ -290,7 +283,6 @@ To download a specific commit from a git repository using a hashtag: <br>
 commit=26911cc471c9316f7a67495d4fd544dce35b758d
 git clone git@forge.nemo-ocean.eu:nemo/nemo.git NEMO4
 cd NEMO4 ; git checkout $commit
-
 ```
 Email from Jean-MArc 2023-03-20: <br>
 ```
@@ -312,5 +304,4 @@ Entre EGAI et GAI il y a une difference au niveau des forcages atmosphériques: 
 Ces runs n'ont pas de rappel en SSS.  En revanche, un premier run à été réalisé avec un rappel en SSS et on a conservé ce terme de rappel pour l'utiliser ensuite comme une correction de précipitation.
   Dans le run monomembre, on a utilisé une moyenne mensuelle avec variabilié interannuelle pour ce terme de correction
  Dans le run d'ensemble, on a utilisé une moyenne mensuelle climatologique pour ce terme de correction (suite à une discussion avec Jerome Vialard) ce qui libere la variabilité interannuelle.
-
 ```
