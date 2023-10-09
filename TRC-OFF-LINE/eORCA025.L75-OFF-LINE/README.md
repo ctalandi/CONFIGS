@@ -8,7 +8,8 @@ It has been built from the eORCA025.L75-IMHOTEP.GAI configuration but with our o
 3 - INPUT FILES:<br>
 4 - JOB SUBMISSION: <br>
 5 - RESULTS: <br>
-6 - MISC: <br>
+5 - ANALYSE: <br>
+7 - MISC: <br>
   
 ---
 ## 0 - GENERAL INFORMATION: <br>
@@ -265,9 +266,12 @@ It seems that the advective components are tiny leading the lateral and vertical
 A test permformed with ORCA2 using the last NEMO release 4.2.0 show results that are more expected.<br>
 Investigation are under process (2023-09).<br>
 
+---
+## 6 - ANALYSE:<br>
+Notebooks developped by Anne Gaymard during a M2 interneship are also available under the [ANALYSE](./ANALYSE/) directory.   <br>
 
 ---
-## 6 - MISC:<br>
+## 7 - MISC:<br>
 Other information arond the IMHOTEP input data:<br> 
 
 Email from Jean-MArc 2023-05-17: <br>
