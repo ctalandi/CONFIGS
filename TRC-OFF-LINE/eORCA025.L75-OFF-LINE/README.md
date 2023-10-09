@@ -8,7 +8,7 @@ It has been built from the eORCA025.L75-IMHOTEP.GAI configuration but with our o
 3 - INPUT FILES:<br>
 4 - JOB SUBMISSION: <br>
 5 - RESULTS: <br>
-5 - ANALYSE: <br>
+6 - ANALYSE: <br>
 7 - MISC: <br>
   
 ---
