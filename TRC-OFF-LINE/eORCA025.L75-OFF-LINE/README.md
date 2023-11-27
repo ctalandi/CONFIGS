@@ -261,6 +261,11 @@ List of the 4 files to deal with to submit a job: <br>
 
 ---
 ## 5 - RESULTS:<br>
+Update November 2023: <br>
+The model is waiting for transport components, not velocities. So the trcadv.F90 has to be modified to do so. <br> 
+This solves the initial problem. <br>
+
+September 2023: <br>
 Based on this configuration, a problem has been identified. <br>
 It seems that the advective components are tiny leading the lateral and vertical diffusivity to be the major trends on the full advective diffusive equation.<br>
 A test permformed with ORCA2 using the last NEMO release 4.2.0 show results that are more expected.<br>
