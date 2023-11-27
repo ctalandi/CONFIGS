@@ -273,6 +273,26 @@ Investigation are under process (2023-09).<br>
 
 ---
 ## 6 - ANALYSE:<br>
+Update November 2023 <br>
+3 main experiments have been realized with a passive tracer set to 1 at the surface in 3 distinct regions of the North Atlantic; SPG, NAC or STG: <br>
+- Only advective (1-year long 2000) <br>
+- Only diffusive (1-year long 2000)  <br>
+- Advective & diffusive as well (10-year long 2000-2009)  <br>
+Results are stored on the WORK area of Jean-Zay: /gpfswork/rech/hjl/rost832/eORCA025.L75 <br>
+```
+1-year long diffusive only in 3 areas:
+eORCA025.L75-OFF-DIFF_NAC  
+eORCA025.L75-OFF-DIFF_STG  
+eORCA025.L75-OFF-DIFF_SPG  
+
+1-year long advective only in 3 areas:
+eORCA025.L75-OFF-RUN1-SPG-S  
+eORCA025.L75-OFF-RUN1-STG-S
+eORCA025.L75-OFF-RUN1-NAC-S  
+
+10-year long advective & diffusive experiment with a tracer initialized to 1 at the surface of the ocean: 
+eORCA025.L75-OFF-RUN1-S  
+```
 Notebooks developped by Anne Gaymard during a M2 interneship are also available under the [ANALYSE](./ANALYSE/) directory.   <br>
 
 ---
