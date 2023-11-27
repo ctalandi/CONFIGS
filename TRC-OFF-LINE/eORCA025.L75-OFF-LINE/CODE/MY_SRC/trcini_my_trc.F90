@@ -52,11 +52,12 @@ CONTAINS
       IF( .NOT. ln_rsttr ) THEN
               trn(:,:,:,jp_myt0:jp_myt1) = 0.
               !trn(900:1000,900:1000,:,jp_myt0:jp_myt1) = 1.
-              !trn( mi0(900):mi1(1000) , mj0(900):mj1(1000),1,jp_myt0:jp_myt1) = 1.
-              trn( mi0(935):mi1(955) , mj0(947):mj1(954),1,jp_myt0:jp_myt1) = 10000. !zone 0: courant du Lab
-              trn( mi0(977):mi1(979) , mj0(949):mj1(952),1,jp_myt0:jp_myt1) = 10000. !zone 1: lon_min=-43.75 ;lon_max=43.25 ;lat_min=55.5 ;lat_max=56
-              trn( mi0(977):mi1(979) , mj0(899):mj1(902),1,jp_myt0:jp_myt1) = 10000. !zone 2: lon_min=-43.75 ;lon_max=43.25 ;lat_min=47.25 ;lat_max=47.75
-              trn( mi0(977):mi1(979) , mj0(799):mj1(802),1,jp_myt0:jp_myt1) = 10000. !zone 3: lon_min=-43.75 ;lon_max=43.25 ;lat_min=27.5 ;lat_max=28
+              trn( :,:,1,jp_myt0:jp_myt1) = 1.
+              !trn( mi0(935):mi1(955) , mj0(947):mj1(954),1,jp_myt0:jp_myt1) = 1. !zone 0: courant du Lab
+              !trn( mi0(977):mi1(979) , mj0(949):mj1(952),1,jp_myt0:jp_myt1) = 1. !zone 1: lon_min=-43.75 ;lon_max=43.25 ;lat_min=55.5  ;lat_max=56
+              !trn( mi0(977):mi1(979) , mj0(899):mj1(902),1,jp_myt0:jp_myt1) = 1. !zone 2: lon_min=-43.75 ;lon_max=43.25 ;lat_min=47.25 ;lat_max=47.75
+              !trn( mi0(977):mi1(979) , mj0(799):mj1(802),1,jp_myt0:jp_myt1) = 1. !zone 3: lon_min=-43.75 ;lon_max=43.25 ;lat_min=27.5  ;lat_max=28
+
       ENDIF
       !
    END SUBROUTINE trc_ini_my_trc

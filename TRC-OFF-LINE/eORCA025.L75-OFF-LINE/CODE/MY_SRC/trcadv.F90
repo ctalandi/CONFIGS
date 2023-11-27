@@ -86,12 +86,16 @@ CONTAINS
       !
       !                                         !==  effective transport  ==!
       IF( l_offline ) THEN
-         !zun(:,:,:) = 0.e0                 
-         !zvn(:,:,:) = 0.3 
-         !zwn(:,:,:) = 0.e0
-         zun(:,:,:) = 5.*un(:,:,:)                    ! already in (un,vn,wn)
-         zvn(:,:,:) = 5.*vn(:,:,:)
-         zwn(:,:,:) = 5.*wn(:,:,:)
+         !zun(:,:,:) = un(:,:,:)                    ! already in (un,vn,wn)
+         !zvn(:,:,:) = vn(:,:,:)
+         !zwn(:,:,:) = wn(:,:,:)
+         ! When using input velocities need to compute the transport
+         DO jk = 1, jpkm1
+            zun(:,:,jk) = e2u  (:,:) * e3u_n(:,:,jk) * un(:,:,jk)
+            zvn(:,:,jk) = e1v  (:,:) * e3v_n(:,:,jk) * vn(:,:,jk)
+            zwn(:,:,jk) = e1e2t(:,:)                 * wn(:,:,jk)
+         END DO
+
       ELSE                                         ! build the effective transport
          zun(:,:,jpk) = 0._wp
          zvn(:,:,jpk) = 0._wp
