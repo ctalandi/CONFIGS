@@ -1,0 +1,240 @@
+!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!! NEMO/TOP1 :  Configuration namelist : used to overwrite defaults values defined in SHARED/namelist_top_ref
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!-----------------------------------------------------------------------
+&namtrc_run      !   run information
+!-----------------------------------------------------------------------
+   ln_top_euler  = .true.
+   ln_rsttr      = .false.   !  start from a restart file (T) or not (F)
+   nn_rsttr      =   0       !  restart control = 0 initial time step is not compared to the restart file value
+                             !                  = 1 do not use the value in the restart file
+                             !                  = 2 calendar parameters read in the restart file
+   cn_trcrst_in  = "<TRCRST_IN>"         !  suffix of pass. sn_tracer restart name (input)
+   cn_trcrst_indir = "<CN_IN_TRCRST>"    !  directory from which to read input passive tracer restarts
+   cn_trcrst_out = "<TRCRST_OUT>"        !  suffix of pass. sn_tracer restart name (output)
+   cn_trcrst_outdir = "<CN_OUT_TRCRST>"  !  directory to which to write output passive tracer restarts
+/
+!-----------------------------------------------------------------------
+&namtrc          !   tracers definition
+!-----------------------------------------------------------------------
+   jp_bgc        =  24
+!
+   ln_pisces     =  .true.
+   ln_my_trc     =  .false.
+   ln_age        =  .false.
+   ln_cfc11      =  .false.
+   ln_cfc12      =  .false.
+   ln_c14        =  .false.
+!
+   ln_trcdta     =  .true.   !  Initialisation from data input file (T) or not (F)
+   ln_trcbc      =  .true.   !  Enables Boundary conditions
+!                !           !                                           !             !         !
+!                !    name   !           title of the field              !   units     ! init    ! sbc    ! cbc    !  obc    !  ais
+   sn_tracer(1)   = 'DIC     ' , 'Dissolved inorganic Concentration      ',  'mol-C/L' , .true.  , .false., .false., .true. , .false.
+   sn_tracer(2)   = 'Alkalini' , 'Total Alkalinity Concentration         ',  'eq/L '   , .true.  , .false., .false., .true. , .false.
+   sn_tracer(3)   = 'O2      ' , 'Dissolved Oxygen Concentration         ',  'mol-C/L' , .true.  , .false., .false., .true. , .false.
+   sn_tracer(4)   = 'CaCO3   ' , 'Calcite Concentration                  ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(5)   = 'PO4     ' , 'Phosphate Concentration                ',  'mol-C/L' , .true.  , .false., .false., .true. , .false.
+   sn_tracer(6)   = 'POC     ' , 'Small organic carbon Concentration     ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(7)   = 'Si      ' , 'Silicate Concentration                 ',  'mol-C/L' , .true.  , .false., .false., .true. , .false.
+   sn_tracer(8)   = 'PHY     ' , 'Nanophytoplankton Concentration        ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(9)   = 'ZOO     ' , 'Microzooplankton Concentration         ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(10)  = 'DOC     ' , 'Dissolved organic Concentration        ',  'mol-C/L' , .true.  , .false., .false., .true. , .false.
+   sn_tracer(11)  = 'PHY2    ' , 'Diatoms Concentration                  ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(12)  = 'ZOO2    ' , 'Mesozooplankton Concentration          ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(13)  = 'DSi     ' , 'Diatoms Silicate Concentration         ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(14)  = 'Fer     ' , 'Dissolved Iron Concentration           ',  'mol-C/L' , .true.  , .false., .false., .true. , .false.
+   sn_tracer(15)  = 'BFe     ' , 'Big iron particles Concentration       ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(16)  = 'GOC     ' , 'Big organic carbon Concentration       ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(17)  = 'SFe     ' , 'Small iron particles Concentration     ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(18)  = 'DFe     ' , 'Diatoms iron  Concentration            ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(19)  = 'GSi     ' , 'Sinking biogenic Silicate Concentration',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(20)  = 'NFe     ' , 'Nano iron Concentration                ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(21)  = 'NCHL    ' , 'Nano chlorophyl Concentration          ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(22)  = 'DCHL    ' , 'Diatoms chlorophyl Concentration       ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+   sn_tracer(23)  = 'NO3     ' , 'Nitrates Concentration                 ',  'mol-C/L' , .true.  , .false., .false., .true. , .false.
+   sn_tracer(24)  = 'NH4     ' , 'Ammonium Concentration                 ',  'mol-C/L' , .false. , .false., .false., .true. , .false.
+/
+!-----------------------------------------------------------------------
+&namage          !   AGE 
+!-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namtrc_dta      !    Initialisation from data input file
+!-----------------------------------------------------------------------
+!          !  file name  ! frequency (hours) ! variable  ! time interp. !  clim  ! 'yearly'/ ! weights  ! rotation ! land/sea mask !
+!          !             !  (if <0  months)  !   name    !   (logical)  !  (T/F) ! 'monthly' ! filename ! pairing  ! filename      !
+   sn_trcdta(1)  = 'FREEBIORYS2V4-CREG025.L75_dic_1m_y1993'  ,  -12   ,  'dic'  ,    .false.   , .true. , 'yearly'  , ''       , ''   , ''
+   sn_trcdta(2)  = 'FREEBIORYS2V4-CREG025.L75_alk_1m_y1993'  ,  -12   ,  'alk'  ,    .false.   , .true. , 'yearly'  , ''       , ''   , ''
+   sn_trcdta(3)  = 'FREEBIORYS2V4-CREG025.L75_o2_1m_y1993'   ,  -12   ,  'o2'   ,    .false.   , .true. , 'yearly'  , ''       , ''   , ''
+   sn_trcdta(5)  = 'FREEBIORYS2V4-CREG025.L75_po4_1m_y1993'  ,  -12   ,  'po4'  ,    .false.   , .true. , 'yearly'  , ''       , ''   , ''
+   sn_trcdta(7)  = 'FREEBIORYS2V4-CREG025.L75_si_1m_y1993'   ,  -12   ,  'si'   ,    .false.   , .true. , 'yearly'  , ''       , ''   , ''
+   sn_trcdta(10) = 'FREEBIORYS2V4-CREG025.L75_doc_1m_y1993'  ,  -12   ,  'doc'  ,    .false.   , .true. , 'yearly'  , ''       , ''   , ''
+   sn_trcdta(14) = 'FREEBIORYS2V4-CREG025.L75_fe_1m_y1993'   ,  -12   ,  'fe'   ,    .false.   , .true. , 'yearly'  , ''       , ''   , ''
+   sn_trcdta(23) = 'FREEBIORYS2V4-CREG025.L75_no3_1m_y1993'  ,  -12   ,  'no3'  ,    .false.   , .true. , 'yearly'  , ''       , ''   , ''
+   rn_trfac(1)   =   1.0   !  multiplicative factor
+   rn_trfac(2)   =   1.0   !  -      -      -     -
+   rn_trfac(3)   =   1.0   !  -      -      -     -
+   rn_trfac(5)   =   1.0   !  -      -      -     -
+   rn_trfac(7)   =   1.0   !  -      -      -     -
+   rn_trfac(10)  =   1.0   !  -      -      -     -
+   rn_trfac(14)  =   1.0   !  -      -      -     -
+   rn_trfac(23)  =   1.0   !  -      -      -     -
+/
+!-----------------------------------------------------------------------
+&namtrc_adv      !   advection scheme for passive tracer                (default: NO selection)
+!-----------------------------------------------------------------------
+   ln_trcadv_mus =  .true.   !  MUSCL scheme
+      ln_mus_ups =  .false.         !  use upstream scheme near river mouths
+/
+!-----------------------------------------------------------------------
+&namtrc_ldf      !   lateral diffusion scheme for passive tracer        (default: NO selection)
+!-----------------------------------------------------------------------
+   ln_trcldf_tra   =  .true.     !  use active tracer setting
+/
+!-----------------------------------------------------------------------
+&namtrc_rad      !  treatment of negative concentrations 
+!-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namtrc_snk      !  sedimentation of particles
+!-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namtrc_dmp      !   passive tracer newtonian damping   
+!-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namtrc_ice      !    Representation of sea ice growth & melt effects
+!-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namtrc_trd      !   diagnostics on tracer trends                       ('key_trdtrc')
+!----------------------------------------------------------------------
+/
+!----------------------------------------------------------------------
+&namtrc_bc       !   data for boundary conditions
+!-----------------------------------------------------------------------
+!                !  file name        ! frequency (hours) ! variable      ! time interp. !  clim  ! 'yearly'/ ! weights  ! rotation ! land/sea mask !
+!                !                   !  (if <0  months)  !   name        !   (logical)  !  (T/F) ! 'monthly' ! filename ! pairing  ! filename      !
+   sn_trcobc(1)  = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_dic'   , -12 ,    'dic'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(2)  = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_alk'   , -12 ,    'alk'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(3)  = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_o2'    , -12 ,    'o2'       ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(4)  = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_caco3' , -12 ,    'caco3'    ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(5)  = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_po4'   , -12 ,    'po4'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(6)  = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_poc'   , -12 ,    'poc'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(7)  = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_si'    , -12 ,    'si'       ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(8)  = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_phy'   , -12 ,    'phy'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(9)  = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_zoo'   , -12 ,    'zoo'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(10) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_doc'   , -12 ,    'doc'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(11) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_phy2'  , -12 ,    'phy2'     ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(12) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_zoo2'  , -12 ,    'zoo2'     ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(13) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_dsi'   , -12 ,    'dsi'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(14) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_fe'    , -12 ,    'fe'       ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(15) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_bfe'   , -12 ,    'bfe'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(16) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_goc'   , -12 ,    'goc'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(17) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_sfe'   , -12 ,    'sfe'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(18) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_dfe'   , -12 ,    'dfe'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(19) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_gsi'   , -12 ,    'gsi'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(20) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_nfe'   , -12 ,    'nfe'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(21) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_nchl'  , -12 ,    'nchl'     ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(22) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_dchl'  , -12 ,    'dchl'     ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(23) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_no3'   , -12 ,    'no3'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(24) = 'FREEBIORYS2V4_SUBTROPGYRE_CLIM-1993-2022.1m_nh4'   , -12 ,    'nh4'      ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+
+   cn_tronam(1)  = 'dic' 
+   cn_tronam(2)  = 'alk' 
+   cn_tronam(3)  = 'o2'  
+   cn_tronam(4)  = 'caco3'
+   cn_tronam(5)  = 'po4' 
+   cn_tronam(6)  = 'poc' 
+   cn_tronam(7)  = 'si'  
+   cn_tronam(8)  = 'phy' 
+   cn_tronam(9)  = 'zoo' 
+   cn_tronam(10) = 'doc' 
+   cn_tronam(11) = 'phy2'
+   cn_tronam(12) = 'zoo2'
+   cn_tronam(13) = 'dsi' 
+   cn_tronam(14) = 'fe'  
+   cn_tronam(15) = 'bfe' 
+   cn_tronam(16) = 'goc' 
+   cn_tronam(17) = 'sfe' 
+   cn_tronam(18) = 'dfe' 
+   cn_tronam(19) = 'gsi' 
+   cn_tronam(20) = 'nfe' 
+   cn_tronam(21) = 'nchl'
+   cn_tronam(22) = 'dchl'
+   cn_tronam(23) = 'no3' 
+   cn_tronam(24) = 'nh4' 
+/
+!----------------------------------------------------------------------
+&namtrc_bc       !   data for boundary conditions
+!-----------------------------------------------------------------------
+!                !  file name        ! frequency (hours) ! variable      ! time interp. !  clim  ! 'yearly'/ ! weights  ! rotation ! land/sea mask !
+!                !                   !  (if <0  months)  !   name        !   (logical)  !  (T/F) ! 'monthly' ! filename ! pairing  ! filename      !
+   sn_trcobc(1)  = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_dic'   , -12 ,    'dic'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(2)  = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_alk'   , -12 ,    'alk'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(3)  = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_o2'    , -12 ,    'o2'      ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(4)  = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_caco3' , -12 ,    'caco3'   ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(5)  = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_po4'   , -12 ,    'po4'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(6)  = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_poc'   , -12 ,    'poc'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(7)  = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_si'    , -12 ,    'si'      ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(8)  = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_phy'   , -12 ,    'phy'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(9)  = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_zoo'   , -12 ,    'zoo'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(10) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_doc'   , -12 ,    'doc'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(11) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_phy2'  , -12 ,    'phy2'    ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(12) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_zoo2'  , -12 ,    'zoo2'    ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(13) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_dsi'   , -12 ,    'dsi'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(14) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_fe'    , -12 ,    'fe'      ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(15) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_bfe'   , -12 ,    'bfe'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(16) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_goc'   , -12 ,    'goc'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(17) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_sfe'   , -12 ,    'sfe'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(18) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_dfe'   , -12 ,    'dfe'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(19) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_gsi'   , -12 ,    'gsi'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(20) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_nfe'   , -12 ,    'nfe'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(21) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_nchl'  , -12 ,    'nchl'    ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(22) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_dchl'  , -12 ,    'dchl'    ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(23) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_no3'   , -12 ,    'no3'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+   sn_trcobc(24) = 'FREEBIORYS2V4_BERING_CLIM-1993-2022.1m_nh4'   , -12 ,    'nh4'     ,  .true.   , .true. , 'yearly'  , ''       , ''    , ''
+
+   cn_tronam(1)  = 'dic' 
+   cn_tronam(2)  = 'alk' 
+   cn_tronam(3)  = 'o2'  
+   cn_tronam(4)  = 'caco3'
+   cn_tronam(5)  = 'po4' 
+   cn_tronam(6)  = 'poc' 
+   cn_tronam(7)  = 'si'  
+   cn_tronam(8)  = 'phy' 
+   cn_tronam(9)  = 'zoo' 
+   cn_tronam(10) = 'doc' 
+   cn_tronam(11) = 'phy2'
+   cn_tronam(12) = 'zoo2'
+   cn_tronam(13) = 'dsi' 
+   cn_tronam(14) = 'fe'  
+   cn_tronam(15) = 'bfe' 
+   cn_tronam(16) = 'goc' 
+   cn_tronam(17) = 'sfe' 
+   cn_tronam(18) = 'dfe' 
+   cn_tronam(19) = 'gsi' 
+   cn_tronam(20) = 'nfe' 
+   cn_tronam(21) = 'nchl'
+   cn_tronam(22) = 'dchl'
+   cn_tronam(23) = 'no3' 
+   cn_tronam(24) = 'nh4' 
+/
+!----------------------------------------------------------------------
+&namtrc_bdy      !   Setup of tracer boundary conditions
+!-----------------------------------------------------------------------
+   cn_trc_dflt   = 'frs', 'frs'      !  OBC applied by default to all tracers
+   cn_trc        = 'frs', 'frs'    !  Boundary conditions used for tracers with data files (selected in namtrc)
+
+   nn_trcdmp_bdy = 0, 0      !  Use damping timescales defined in nambdy of namelist
+                             !  = 0 NO damping of tracers at open boudaries
+                             !  = 1 Only for tracers forced with external data
+                             !  = 2 Damping applied to all tracers
+   ln_zintobc = .false. , .false.    ! OBC data requires (T) a vertical interpolation
+/
+!-----------------------------------------------------------------------
+&namtrc_ais      !  Representation of Antarctic Ice Sheet tracers supply
+!-----------------------------------------------------------------------
+/

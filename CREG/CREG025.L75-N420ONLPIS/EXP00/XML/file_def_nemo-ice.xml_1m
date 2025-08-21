@@ -1,0 +1,77 @@
+    <!-- 
+============================================================================================================
+=                                           output files definition                                        =
+=                                            Define your own files                                         =
+=                                         put the variables you want...                                    =
+============================================================================================================
+    -->
+    
+    <file_definition type="one_file" name="<OUTDIR>/@expname@_@freq@" sync_freq="1mo" min_digits="4">
+    
+      <file_group id="2h" output_freq="2h"  output_level="10" enabled=".TRUE."/> <!-- 2h files -->
+      <file_group id="3h" output_freq="3h"  output_level="10" enabled=".TRUE."/> <!-- 3h files -->     
+      <file_group id="4h" output_freq="4h"  output_level="10" enabled=".TRUE."/> <!-- 4h files -->
+      <file_group id="6h" output_freq="6h"  output_level="10" enabled=".TRUE."/> <!-- 6h files -->
+
+      <file_group id="1mo" output_freq="1mo" output_level="10" enabled=".TRUE.">  <!-- 1mo files -->  
+        <!-- ########    INTEGRATED-VARIABLES    ########  -->
+        <file id="file7" name_suffix="_SBC_scalar" split_freq="1y" description="scalar variables" >
+          <field field_ref="ibgvol_tot"    name="ibgvoltot"    long_name="global mean ice volume"        />
+          <field field_ref="sbgvol_tot"    name="sbgvoltot"    long_name="global mean snow volume"       />
+          <field field_ref="ibgarea_tot"   name="ibgarea"      long_name="global mean ice area"          />
+          <field field_ref="ibgheat_tot"   name="ibgheatco"    long_name="global mean ice heat content"  />
+          <field field_ref="ibgsalt_tot"   name="ibgsaltco"    long_name="global mean ice salt content"  />
+          <field field_ref="sbgheat_tot"   name="sbgheatco"    long_name="global mean snow heat content" />
+
+          <variable name="start_date"       type="int"><NDATE0>    </variable>
+          <variable name="output_frequency" type="string">1mo       </variable>
+          <variable name="CONFIG"           type="string"><CONFIG> </variable>
+          <variable name="CASE"             type="string"><CASE>   </variable>
+        </file>
+
+ 
+	<!-- ########    ICEMOD-GRID    ########  -->
+	<file id="file6" name_suffix="_icemod" split_freq="1mo" description="ice variables"  >
+              <field field_ref="icevolu"          name="sivolu"     long_name="ice volume"     />
+              <field field_ref="snwvolu"          name="snvolu"     long_name="snow volume"    />
+
+              <field field_ref="icetemp"          name="sitemp"     long_name="Mean ice temperature"  />
+              <field field_ref="icesalt"          name="sisali"     long_name="Mean ice salinity"     />
+              <field field_ref="iceage"           name="siages"     long_name="Mean ice age"          />
+
+              <field field_ref="vfxice"           name="vfxice"     long_name="Mean ice mass flux"     />
+              <field field_ref="sfxice"           name="sfxice"     long_name="Mean ice salt flux"     />
+
+              <field field_ref="iceconc"          name="siconc"     long_name="ice concentration"     />
+              <field field_ref="icethic"          name="sithic"     long_name="Ice thickness"       />
+              <field field_ref="snwthic"          name="snthic"     long_name="Snow thickness"      />
+
+              <field field_ref="uice"             name="sivelu"     long_name="Ice velocity along i-axis at I-point (ice presence average)" />             
+              <field field_ref="vice"             name="sivelv"     long_name="Ice velocity along j-axis at I-point (ice presence average)" />
+              <field field_ref="utau_ai"          name="iicestru"   long_name="Wind stress along i-axis over the ice at i-point"  />
+              <field field_ref="vtau_ai"          name="iicestrv"   long_name="Wind stress along j-axis over the ice at i-point"  />
+              <field field_ref="icevel"           name="sivelo"     long_name="ice speed"      />
+              <field field_ref="icestr"           name="sistre"     long_name="ice strength"   />
+              <field field_ref="icediv"           name="sidive"     long_name="ice divergence" />
+              <field field_ref="iceshe"           name="sishea"     long_name="ice shear"      />
+              <field field_ref="intstrx"          name="intstrx"    long_name="Internal stress term in force balance (x-component)"   />
+              <field field_ref="intstry"          name="intstry"    long_name="Internal stress term in force balance (y-component)"   />
+                  
+              <variable name="start_date"       type="int"><NDATE0>    </variable>
+              <variable name="output_frequency" type="string">1mo       </variable>
+              <variable name="CONFIG"           type="string"><CONFIG> </variable>
+              <variable name="CASE"             type="string"><CASE>   </variable>
+        </file>
+      </file_group>
+
+      <file_group id="2m" output_freq="2mo" output_level="10" enabled=".TRUE."/> <!-- real 2m files -->
+      <file_group id="3m" output_freq="3mo" output_level="10" enabled=".TRUE."/> <!-- real 3m files -->
+      <file_group id="4m" output_freq="4mo" output_level="10" enabled=".TRUE."/> <!-- real 4m files -->
+      <file_group id="6m" output_freq="6mo" output_level="10" enabled=".TRUE."/> <!-- real 6m files -->
+
+      <file_group id="1y"  output_freq="1y" output_level="10" enabled=".TRUE."/> <!-- real yearly files -->
+      <file_group id="2y"  output_freq="2y" output_level="10" enabled=".TRUE."/> <!-- real 2y files -->
+      <file_group id="5y"  output_freq="5y" output_level="10" enabled=".TRUE."/> <!-- real 5y files -->
+      <file_group id="10y" output_freq="10y" output_level="10" enabled=".TRUE."/> <!-- real 10y files -->
+
+   </file_definition>
