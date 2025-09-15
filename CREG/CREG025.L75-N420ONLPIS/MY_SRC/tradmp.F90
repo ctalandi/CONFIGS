@@ -47,14 +47,14 @@ MODULE tradmp
    INTEGER            , PUBLIC ::   nn_zdmp     !: = 0/1/2 flag for damping in the mixed layer
    CHARACTER(LEN=200) , PUBLIC ::   cn_resto    !: name of netcdf file containing restoration coefficient field
    !
-!CT for SEDNA !!{ DRAKKAR
+!CT CREG { DRAKKAR
    INTEGER , PUBLIC ::   nn_hdmp     ! > 0 standard NEMO CODE
                                      ! = -2 = DRAKKAR customization
    INTEGER , PUBLIC ::   nn_file     ! = 1 create a damping.coeff NetCDF file 
    LOGICAL  ::   ln_dmpmask          !  flag for using mask_dmp file
    INTEGER, SAVE   ::   nk200        !  vertical index for depth > 200 m in ORCA 2
    REAL(wp) ::   rn_timsk            !  restoring time scale used with mask_dmp       [days] 
-!CT for SEDNA !!}
+!CT CREG }
 
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) ::   resto    !: restoring coeff. on T and S (s-1)
 
@@ -100,10 +100,10 @@ CONTAINS
       !!----------------------------------------------------------------------
       INTEGER,                                   INTENT(in   ) :: kt              ! ocean time-step index
       INTEGER,                                   INTENT(in   ) :: Kbb, Kmm, Krhs  ! time level indices
-      REAL(wp), DIMENSION(jpi,jpj,jpk,jpts,jpt), INTENT(inout) :: pts             ! active tracers and RHS of tracer equation
+      REAL(dp), DIMENSION(jpi,jpj,jpk,jpts,jpt), INTENT(inout) :: pts             ! active tracers and RHS of tracer equation
       !
       INTEGER ::   ji, jj, jk, jn   ! dummy loop indices
-      REAL(wp), DIMENSION(A2D(nn_hls),jpk,jpts)     ::  zts_dta
+      REAL(dp), DIMENSION(A2D(nn_hls),jpk,jpts)     ::  zts_dta
       REAL(wp), DIMENSION(:,:,:)  , ALLOCATABLE ::  zwrk
       REAL(wp), DIMENSION(:,:,:,:), ALLOCATABLE ::  ztrdts
       !!----------------------------------------------------------------------
@@ -200,10 +200,10 @@ CONTAINS
       INTEGER ::   ios, imask   ! local integers
       !
       NAMELIST/namtra_dmp/ ln_tradmp, nn_zdmp, cn_resto
-!CT for SEDNA !!{DRAKKAR
+!CT CREG {DRAKKAR
       INTEGER :: jk ! dummy loop index
       NAMELIST/namtra_dmp/ nn_hdmp , nn_file, ln_dmpmask, rn_timsk
-!CT for SEDNA !!}
+!CT CREG }
       !!----------------------------------------------------------------------
       !
       READ  ( numnam_ref, namtra_dmp, IOSTAT = ios, ERR = 901)
@@ -222,25 +222,25 @@ CONTAINS
          WRITE(numout,*) '         mixed layer damping option      nn_zdmp  = ', nn_zdmp
          WRITE(numout,*) '         Damping file name               cn_resto = ', cn_resto
          WRITE(numout,*)
-!CT for SEDNA !!{DRAKKAR
+!CT CREG {DRAKKAR
          WRITE(numout,*) '      T and S damping option          nn_hdmp   = ', nn_hdmp
          WRITE(numout,*) '      use a mask_dmp file (T/F)      ln_dmpmask = ', ln_dmpmask
          WRITE(numout,*) '      time scale (mask_dmp)            rn_timsk = ', rn_timsk
          WRITE(numout,*) '      create a damping.coeff file     nn_file   = ', nn_file
-!CT for SEDNA !!}
+!CT CREG }
       ENDIF
       !
       IF( ln_tradmp ) THEN
          !                          ! Allocate arrays
          IF( tra_dmp_alloc() /= 0 )   CALL ctl_stop( 'STOP', 'tra_dmp_init: unable to allocate arrays' )
          !
-!CT for SEDNA !!{DRAKKAR
+!CT CREG { DRAKKAR
          SELECT CASE ( nn_hdmp )
          CASE (  -2  )   ;   IF(lwp) WRITE(numout,*) '   Drakkar customization '
          CASE DEFAULT
                              IF(lwp) WRITE(numout,*) '   Standard Nemo relaxation '
          END SELECT
-!CT for SEDNA !!}
+!CT CREG }
 
          SELECT CASE (nn_zdmp)      ! Check values of nn_zdmp
          CASE ( 0 )   ;   IF(lwp) WRITE(numout,*) '   tracer damping as specified by mask'
@@ -259,17 +259,17 @@ CONTAINS
             CALL dta_tsd_init( ld_tradmp=ln_tradmp )        ! forces the initialisation of T-S data
          ENDIF
          !                          ! Read in mask from file
-!CT for SEDNA !!{DRAKKAR
+!CT CREG { DRAKKAR
          !CALL iom_open ( cn_resto, imask)
          !CALL iom_get  ( imask, jpdom_autoglo, 'resto', resto )
          !CALL iom_close( imask )
          CALL dtacof( nn_hdmp, nn_file, 'TRA', resto )
-!CT for SEDNA !!}
+!CT CREG }
       ENDIF
       !
    END SUBROUTINE tra_dmp_init
 
-!CT for SEDNA !!{ DRAKKAR
+!CT CREG { DRAKKAR
    SUBROUTINE dtacof( kn_hdmp, kn_file, cdtype , presto )
       !!----------------------------------------------------------------------
       !!                  ***  ROUTINE dtacof  ***

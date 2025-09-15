@@ -102,6 +102,7 @@ MODULE zdftke
 
    !! * Substitutions
 #  include "do_loop_substitute.h90"
+#  include "single_precision_substitute.h90"
 #  include "domzgr_substitute.h90"
    !!----------------------------------------------------------------------
    !! NEMO/OCE 4.0 , NEMO Consortium (2018)
@@ -218,12 +219,13 @@ CONTAINS
       INTEGER , DIMENSION(A2D(nn_hls))     ::   imlc
       REAL(wp), DIMENSION(A2D(nn_hls))     ::   zice_fra, zhlc, zus3, zWlc2
       REAL(wp), DIMENSION(A2D(nn_hls),jpk) ::   zpelc, zdiag, zd_up, zd_lw
-      REAL(wp), DIMENSION(:,:,:), ALLOCATABLE ::   ztmp ! for diags
+      REAL(wp), DIMENSION(:,:,:), ALLOCATABLE, SAVE ::   ztmp ! for diags
+      REAL(wp) :: zdiv
       !!--------------------------------------------------------------------
       !
       zbbrau  = rn_ebb / rho0       ! Local constant initialisation
       zbbirau = 3.75_wp / rho0
-      zfact1  = -0.5_wp * rn_Dt
+      zfact1  = -.5_wp * rn_Dt
       zfact2  = 1.5_wp * rn_Dt * rn_ediss
       zfact3  = 0.5_wp         * rn_ediss
       !
@@ -242,21 +244,14 @@ CONTAINS
       !                     !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
       !
       DO_2D_OVR( nn_hls-1, nn_hls-1, nn_hls-1, nn_hls-1 )
-!CT for SEDNA { 
+!CT CREG { 
          !en(ji,jj,1) = MAX( rn_emin0, zbbrau * taum(ji,jj) )
          en(ji,jj,1) = MAX( rn_emin0, ( ( 1._wp - fr_i(ji,jj) ) * zbbrau + &
             &                                     fr_i(ji,jj)   * zbbirau ) * taum(ji,jj) ) * tmask(ji,jj,1)
-!CT for SEDNA } 
+!CT CREG } 
          zdiag(ji,jj,1) = 1._wp/en(ji,jj,1)
          zd_lw(ji,jj,1) = 1._wp
          zd_up(ji,jj,1) = 0._wp
-
-!CT TO GO FURTHER          en(:,:,1) = MAX( rn_emin0, ( ( 1._wp - fr_i(:,:) ) * zbbrau + &
-!CT TO GO FURTHER             &                                     fr_i(:,:)   * zbbirau ) * taum(:,:) ) * tmask(:,:,1)
-!CT TO GO FURTHER          zdiag(:,:,1) = 1.e-7
-!CT TO GO FURTHER          !zdiag(:,:,1) = 1._wp/en(:,:,1)
-!CT TO GO FURTHER          zd_lw(:,:,1) = 1._wp
-!CT TO GO FURTHER          zd_up(:,:,1) = 0._wp
       END_2D
       !
       !                     !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -305,17 +300,13 @@ CONTAINS
             !                                !     1/2  (W_lc)^2 = MAX( u* u_s + v* v_s , 0 )   only the positive part
 !!gm  ! PS: currently we don't have neither the 2 stress components at t-point !nor the angle between u* and u_s
 !!gm  ! so we will overestimate the LC velocity....   !!gm I will do the work if !LC have an effect !
-            DO_2D( nn_hls-1, nn_hls-1, nn_hls-1, nn_hls-1 )
-!!XC                  zWlc2(ji,jj) = 0.5_wp * SQRT( taum(ji,jj) * r1_rho0 * ( ut0sd(ji,jj)**2 +vt0sd(ji,jj)**2 )  )
-                  zWlc2(ji,jj) = 0.5_wp *  ( ut0sd(ji,jj)**2 +vt0sd(ji,jj)**2 )
-            END_2D
 !
 !  Projection of Stokes drift in the wind stress direction
 !
             DO_2D( nn_hls-1, nn_hls-1, nn_hls-1, nn_hls-1 )
                   ztaui   = 0.5_wp * ( utau(ji,jj) + utau(ji-1,jj) )
                   ztauj   = 0.5_wp * ( vtau(ji,jj) + vtau(ji,jj-1) )
-                  z1_norm = 1._wp / MAX( SQRT(ztaui*ztaui+ztauj*ztauj), 1.e-12 ) * tmask(ji,jj,1)
+                  z1_norm = 1._wp / MAX( ztaui*ztaui+ztauj*ztauj, 1.e-12 ) * tmask(ji,jj,1)
                   zWlc2(ji,jj) = 0.5_wp * z1_norm * ( MAX( ut0sd(ji,jj)*ztaui + vt0sd(ji,jj)*ztauj, 0._wp ) )**2
             END_2D
          ELSE                          ! Surface Stokes drift deduced from surface stress
@@ -381,7 +372,16 @@ CONTAINS
             IF (rn2b(ji,jj,jk) <= 0.0_wp) then
                 zri = 0.0_wp
             ELSE
-                zri = rn2b(ji,jj,jk) * p_avm(ji,jj,jk) / ( p_sh2(ji,jj,jk) + rn_bshear )
+                ! This logic is to avoid divide-by-zero errors which can occur for single-precision
+                ! The actual value you choose for the denominator instead of zero doesn't really
+                ! matter, as long as it is very small and so triggers the same logic below with the
+                ! inverse Prandtl number
+                zdiv = p_sh2(ji,jj,jk) + rn_bshear
+                IF (zdiv == 0.0_wp) THEN
+                   zri = rn2b(ji,jj,jk) * p_avm(ji,jj,jk) / rn_bshear
+                ELSE
+                   zri = rn2b(ji,jj,jk) * p_avm(ji,jj,jk) / zdiv
+                ENDIF
             ENDIF
             !                             ! inverse of Prandtl number
             apdlr(ji,jj,jk) = MAX(  0.1_wp,  ri_cri / MAX( ri_cri , zri )  )
@@ -462,15 +462,17 @@ CONTAINS
       !    ediss = Ce*sqrt(en)/L*en
       !    dissl = sqrt(en)/L
       IF( iom_use('ediss_k') ) THEN
-         ALLOCATE( ztmp(A2D(nn_hls),jpk) )
-         DO_3D( nn_hls-1, nn_hls-1, nn_hls-1, nn_hls-1, 1, jpkm1 )
+         IF( .NOT. l_istiled .OR. ntile == 1 ) THEN
+            ALLOCATE( ztmp(jpi,jpj,jpk) )
+            ztmp(:,:,:) = 0._wp
+         ENDIF
+         DO_3D_OVR( nn_hls-1, nn_hls-1, nn_hls-1, nn_hls-1, 1, jpkm1 )
             ztmp(ji,jj,jk) = zfact3 * dissl(ji,jj,jk) * en(ji,jj,jk) * wmask(ji,jj,jk)
          END_3D
-         DO_2D( nn_hls-1, nn_hls-1, nn_hls-1, nn_hls-1 )
-            ztmp(ji,jj,jpk) = 0._wp
-         END_2D
-         CALL iom_put( 'ediss_k', ztmp )
-         DEALLOCATE( ztmp )
+         IF( .NOT. l_istiled .OR. ntile == nijtile ) THEN
+            CALL iom_put( 'ediss_k', ztmp )
+            DEALLOCATE( ztmp )
+         ENDIF
       ENDIF
       !
       !                            !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -564,10 +566,12 @@ CONTAINS
       zmxld(:,:,:)  = rmxl_min
       !
       IF(ln_sdw .AND. ln_mxhsw) THEN
-         zmxlm(:,:,1)= vkarmn * MAX ( 1.6 * hsw(:,:) , 0.02 )        ! surface mixing length = F(wave height)
-         ! from terray et al 1999 and mellor and blumberg 2004 it should be 0.85 and not 1.6
+         ! From Terray et al 1999 and Mellor and Blumberg 2004 it should be 0.85 and not 1.6
          zcoef       = vkarmn * ( (rn_ediff*rn_ediss)**0.25 ) / rn_ediff
-         zmxlm(:,:,1)= zcoef * MAX ( 1.6 * hsw(:,:) , 0.02 )        ! surface mixing length = F(wave height)
+         DO_2D( nn_hls-1, nn_hls-1, nn_hls-1, nn_hls-1 )
+!            zmxlm(ji,jj,1)= vkarmn * MAX ( 1.6 * hsw(ji,jj) , 0.02 )        ! surface mixing length = F(wave height)
+            zmxlm(ji,jj,1)= zcoef * MAX ( 1.6 * hsw(ji,jj) , 0.02 )        ! surface mixing length = F(wave height)
+         END_2D
       ELSE
       !
          IF( ln_mxl0 ) THEN            ! surface mixing length = F(stress) : l=vkarmn*2.e5*taum/(rho0*g)
@@ -702,8 +706,8 @@ CONTAINS
       ENDIF
       !
       IF(sn_cfctl%l_prtctl) THEN
-         CALL prt_ctl( tab3d_1=en   , clinfo1=' tke  - e: ', tab3d_2=p_avt, clinfo2=' t: ' )
-         CALL prt_ctl( tab3d_1=p_avm, clinfo1=' tke  - m: ' )
+         CALL prt_ctl( tab3d_1=CASTDP(en) , clinfo1=' tke  - e: ', tab3d_2=CASTDP(p_avt), clinfo2=' t: ' )
+         CALL prt_ctl( tab3d_1=CASTDP(p_avm), clinfo1=' tke  - m: ' )
       ENDIF
       !
    END SUBROUTINE tke_avn
@@ -773,6 +777,11 @@ CONTAINS
             CASE DEFAULT
                CALL ctl_stop( 'zdf_tke_init: wrong value for nn_mxlice, should be 0,1,2,3 or 4')
             END SELECT
+            IF     ( (nn_mxlice>0).AND.(nn_ice==0) ) THEN
+               CALL ctl_stop( 'zdf_tke_init: with no ice at all, nn_mxlice must be 0 ') 
+            ELSEIF ( (nn_mxlice>1).AND.(nn_ice==1) ) THEN
+               CALL ctl_stop( 'zdf_tke_init: with no ice model, nn_mxlice must be 0 or 1')
+            ENDIF
          ENDIF
          WRITE(numout,*) '      Langmuir cells parametrization              ln_lc     = ', ln_lc
          WRITE(numout,*) '         coef to compute vertical velocity of LC     rn_lc  = ', rn_lc

@@ -93,8 +93,10 @@ MODULE sbcblk
    INTEGER , PUBLIC, PARAMETER ::   jp_cc    = 12   ! index of cloud cover                     (-)      range:0-1
    INTEGER , PUBLIC, PARAMETER ::   jp_hpgi  = 13   ! index of ABL geostrophic wind or hpg (i-component) (m/s) at T-point
    INTEGER , PUBLIC, PARAMETER ::   jp_hpgj  = 14   ! index of ABL geostrophic wind or hpg (j-component) (m/s) at T-point
+!CT CREG { Apply a correction to ERA5 air temperaure
    INTEGER , PUBLIC, PARAMETER ::   jp_skt   = 15   ! index of skin temperature correction 
    INTEGER , PUBLIC, PARAMETER ::   jpfld    = 15   ! maximum number of files to read
+!CT CREG }
 
    ! Warning: keep this structure allocatable for Agrif...
    TYPE(FLD), PUBLIC, ALLOCATABLE, DIMENSION(:) ::   sf   ! structure of input atmospheric fields (file informations, fields read)
@@ -118,7 +120,7 @@ MODULE sbcblk
    REAL(wp) ::   rn_stau_a      ! Alpha and Beta coefficients of Renault et al. 2020, eq. 10: Stau = Alpha * Wnd + Beta
    REAL(wp) ::   rn_stau_b      !
    !
-   REAL(wp)         ::   rn_pfac   ! multiplication factor for precipitation
+   REAL(dp)         ::   rn_pfac   ! multiplication factor for precipitation
    REAL(wp), PUBLIC ::   rn_efac   ! multiplication factor for evaporation
    REAL(wp)         ::   rn_zqt    ! z(q,t) : height of humidity and temperature measurements
    REAL(wp)         ::   rn_zu     ! z(u)   : height of wind measurements
@@ -170,6 +172,7 @@ MODULE sbcblk
 
    !! * Substitutions
 #  include "do_loop_substitute.h90"
+#  include "single_precision_substitute.h90"
    !!----------------------------------------------------------------------
    !! NEMO/OCE 4.0 , NEMO Consortium (2018)
    !! $Id: sbcblk.F90 15551 2021-11-28 20:19:36Z gsamson $
@@ -215,9 +218,9 @@ CONTAINS
       TYPE(FLD_N), DIMENSION(jpfld) ::   slf_i                 ! array of namelist informations on the fields to read
       TYPE(FLD_N) ::   sn_wndi, sn_wndj , sn_humi, sn_qsr      ! informations about the fields to be read
       TYPE(FLD_N) ::   sn_qlw , sn_tair , sn_prec, sn_snow     !       "                        "
-!CT Change to apply the SKT field to the t2m air temperature
+!CT CREG { Apply a correction to ERA5 air temperaure
       TYPE(FLD_N) ::   sn_skt                                  !       "                        "
-!CT Change to apply the SKT field to the t2m air temperature
+!CT CREG }
       TYPE(FLD_N) ::   sn_slp , sn_uoatm, sn_voatm             !       "                        "
       TYPE(FLD_N) ::   sn_cc, sn_hpgi, sn_hpgj                 !       "                        "
       INTEGER     ::   ipka                                    ! number of levels in the atmospheric variable
@@ -231,9 +234,9 @@ CONTAINS
          &                 cn_dir,                                                    &
          &                 sn_wndi, sn_wndj, sn_qsr, sn_qlw ,                         &   ! input fields
          &                 sn_tair, sn_humi, sn_prec, sn_snow, sn_slp,                &
-!CT Change to apply the SKT field to the t2m air temperature
+!CT CREG { Apply a correction to ERA5 air temperaure
          &                 sn_skt,                                                    &
-!CT Change to apply the SKT field to the t2m air temperature
+!CT CREG }
          &                 sn_uoatm, sn_voatm, sn_cc, sn_hpgi, sn_hpgj
 
       ! cool-skin / warm-layer !LB
@@ -343,9 +346,9 @@ CONTAINS
       slf_i(jp_slp  ) = sn_slp     ;   slf_i(jp_cc   ) = sn_cc
       slf_i(jp_uoatm) = sn_uoatm   ;   slf_i(jp_voatm) = sn_voatm
       slf_i(jp_hpgi ) = sn_hpgi    ;   slf_i(jp_hpgj ) = sn_hpgj
-!CT Change to apply the SKT field to the t2m air temperature
+!CT CREG { Apply a correction to ERA5 air temperaure
       slf_i(jp_skt  ) = sn_skt 
-!CT Change to apply the SKT field to the t2m air temperature
+!CT CREG }
       !
       IF( .NOT. ln_abl ) THEN   ! force to not use jp_hpgi and jp_hpgj, should already be done in namelist_* but we never know...
          slf_i(jp_hpgi)%clname = 'NOT USED'
@@ -379,6 +382,8 @@ CONTAINS
                sf(jfpr)%fnow(:,:,1:ipka) = 101325._wp   ! use standard pressure in Pa
             ELSEIF( jfpr == jp_prec .OR. jfpr == jp_snow .OR. jfpr == jp_uoatm .OR. jfpr == jp_voatm ) THEN
                sf(jfpr)%fnow(:,:,1:ipka) = 0._wp        ! no precip or no snow or no surface currents
+            ELSEIF( jfpr == jp_wndi .OR. jfpr == jp_wndj ) THEN
+               sf(jfpr)%fnow(:,:,1:ipka) = 0._wp
             ELSEIF( jfpr == jp_hpgi .OR. jfpr == jp_hpgj ) THEN
                IF( .NOT. ln_abl ) THEN
                   DEALLOCATE( sf(jfpr)%fnow )   ! deallocate as not used in this case
@@ -520,11 +525,10 @@ CONTAINS
       !
       CALL fld_read( kt, nn_fsbc, sf )             ! input fields provided at the current time-step
 
-!CT Change to apply the SKT field to the t2m air temperature
+!CT CREG { Apply a correction to ERA5 air temperaure
      sf(jp_tair)%fnow(:,:,1) = sf(jp_tair)%fnow(:,:,1) - sf(jp_skt)%fnow(:,:,1)
      IF( iom_use('skt_diff') )   CALL iom_put("skt_diff",   sf(jp_skt)%fnow(:,:,1) * tmask(:,:,1))
-!CT Change to apply the SKT field to the t2m air temperature
-
+!CT CREG }
       ! Sanity/consistence test on humidity at first time step to detect potential screw-up:
       IF( kt == nit000 ) THEN
          ! mean humidity over ocean on proc
@@ -575,7 +579,7 @@ CONTAINS
          ELSE
             ! temperature read into file is ABSOLUTE temperature (that's the case for ECMWF products for example...)
             IF((kt==nit000).AND.lwp) WRITE(numout,*) ' *** sbc_blk() => air temperature converted from ABSOLUTE to POTENTIAL!'
-            zpre(:,:)         = pres_temp( q_air_zt(:,:), sf(jp_slp)%fnow(:,:,1), rn_zu, pta=sf(jp_tair)%fnow(:,:,1) )
+            zpre(:,:)         = pres_temp( q_air_zt(:,:), sf(jp_slp)%fnow(:,:,1), rn_zqt, pta=sf(jp_tair)%fnow(:,:,1) )
             theta_air_zt(:,:) = theta_exner( sf(jp_tair)%fnow(:,:,1), zpre(:,:) )
          ENDIF
          !
@@ -588,7 +592,7 @@ CONTAINS
 
          CALL blk_oce_2(     theta_air_zt(:,:),                                    &   !   <<= in
             &                sf(jp_qlw  )%fnow(:,:,1), sf(jp_prec )%fnow(:,:,1),   &   !   <<= in
-            &                sf(jp_snow )%fnow(:,:,1), tsk_m,                      &   !   <<= in
+            &                CASTDP(sf(jp_snow )%fnow(:,:,1)), tsk_m,                      &   !   <<= in
             &                zsen, zlat, zevp )                                        !   <=> in out
       ENDIF
       !
@@ -693,9 +697,9 @@ CONTAINS
       ! ----------------------------------------------------------------------------- !
       !      0   Wind components and module at T-point relative to the moving ocean   !
       ! ----------------------------------------------------------------------------- !
-!CT CREG025.L75
+!CT CREG {
       uw10(:,:) = sf(jp_wndi)%fnow(:,:,1)         ;     vw10(:,:) = sf(jp_wndj)%fnow(:,:,1)
-!CT CREG025.L75
+!CT CREG }
 
       ! ... components ( U10m - U_oce ) at T-point (unmasked)
 #if defined key_cyclone
@@ -824,7 +828,7 @@ CONTAINS
             rhoa(ji,jj) = rho_air( ztabs(ji,jj), q_zu(ji,jj), zpre(ji,jj) )
          END_2D
 
-         CALL BULK_FORMULA( rn_zu, zsspt(:,:), pssq(:,:), theta_zu(:,:), q_zu(:,:), &
+         CALL bulk_formula( rn_zu, zsspt(:,:), pssq(:,:), theta_zu(:,:), q_zu(:,:), &
             &               zcd_oce(:,:), zch_oce(:,:), zce_oce(:,:),          &
             &               wndm(:,:), zU_zu(:,:), pslp(:,:), rhoa(:,:),       &
             &               taum(:,:), psen(:,:), plat(:,:),                   &
@@ -884,11 +888,11 @@ CONTAINS
          CALL iom_put( "vtau_oce", ztau_j(:,:)*tmask(:,:,1) )  ! vtau at T-points!
 
          IF(sn_cfctl%l_prtctl) THEN
-            CALL prt_ctl( tab2d_1=pssq   , clinfo1=' blk_oce_1: pssq   : ')
-            CALL prt_ctl( tab2d_1=wndm   , clinfo1=' blk_oce_1: wndm   : ')
-            CALL prt_ctl( tab2d_1=utau   , clinfo1=' blk_oce_1: utau   : ', mask1=umask,   &
-               &          tab2d_2=vtau   , clinfo2='            vtau   : ', mask2=vmask )
-            CALL prt_ctl( tab2d_1=zcd_oce, clinfo1=' blk_oce_1: Cd     : ')
+            CALL prt_ctl( tab2d_1=CASTDP(pssq), clinfo1=' blk_oce_1: pssq   : ', mask1=tmask )
+            CALL prt_ctl( tab2d_1=CASTDP(wndm), clinfo1=' blk_oce_1: wndm   : ', mask1=tmask )
+            CALL prt_ctl( tab2d_1=CASTDP(utau), clinfo1=' blk_oce_1: utau   : ', mask1=umask,   &
+               &          tab2d_2=CASTDP(vtau), clinfo2='            vtau   : ', mask2=vmask )
+            CALL prt_ctl( tab2d_1=CASTDP(zcd_oce), clinfo1=' blk_oce_1: Cd     : ', mask1=tmask )
          ENDIF
          !
       ENDIF ! ln_blk / ln_abl
@@ -923,7 +927,7 @@ CONTAINS
       REAL(wp), INTENT(in), DIMENSION(:,:) ::   ptair   ! potential temperature of air #LB: confirm!
       REAL(wp), INTENT(in), DIMENSION(:,:) ::   pdqlw   ! downwelling longwave radiation at surface [W/m^2]
       REAL(wp), INTENT(in), DIMENSION(:,:) ::   pprec
-      REAL(wp), INTENT(in), DIMENSION(:,:) ::   psnow
+      REAL(dp), INTENT(in), DIMENSION(:,:) ::   psnow
       REAL(wp), INTENT(in), DIMENSION(:,:) ::   ptsk   ! SKIN surface temperature   [Celsius]
       REAL(wp), INTENT(in), DIMENSION(:,:) ::   psen
       REAL(wp), INTENT(in), DIMENSION(:,:) ::   plat
@@ -961,8 +965,10 @@ CONTAINS
       qns(:,:) = qns(:,:) * tmask(:,:,1)
       !
 #if defined key_si3
-      qns_oce(:,:) = zqlw(:,:) + psen(:,:) + plat(:,:)                             ! non solar without emp (only needed by SI3)
-      qsr_oce(:,:) = qsr(:,:)
+      IF ( nn_ice == 2 ) THEN
+         qns_oce(:,:) = zqlw(:,:) + psen(:,:) + plat(:,:)                  ! non solar without emp (only needed by SI3)
+         qsr_oce(:,:) = qsr(:,:)
+      ENDIF
 #endif
       !
       CALL iom_put( "rho_air"  , rhoa*tmask(:,:,1) )       ! output air density [kg/m^3]
@@ -983,11 +989,11 @@ CONTAINS
       ENDIF
       !
       IF(sn_cfctl%l_prtctl) THEN
-         CALL prt_ctl(tab2d_1=zqlw , clinfo1=' blk_oce_2: zqlw  : ')
-         CALL prt_ctl(tab2d_1=psen , clinfo1=' blk_oce_2: psen  : ' )
-         CALL prt_ctl(tab2d_1=plat , clinfo1=' blk_oce_2: plat  : ' )
-         CALL prt_ctl(tab2d_1=qns  , clinfo1=' blk_oce_2: qns   : ' )
-         CALL prt_ctl(tab2d_1=emp  , clinfo1=' blk_oce_2: emp   : ')
+         CALL prt_ctl(tab2d_1=CASTDP(zqlw), clinfo1=' blk_oce_2: zqlw  : ', mask1=tmask )
+         CALL prt_ctl(tab2d_1=CASTDP(psen), clinfo1=' blk_oce_2: psen  : ', mask1=tmask )
+         CALL prt_ctl(tab2d_1=CASTDP(plat), clinfo1=' blk_oce_2: plat  : ', mask1=tmask )
+         CALL prt_ctl(tab2d_1=CASTDP(qns), clinfo1=' blk_oce_2: qns   : ', mask1=tmask )
+         CALL prt_ctl(tab2d_1=CASTDP(emp), clinfo1=' blk_oce_2: emp   : ', mask1=tmask )
       ENDIF
       !
    END SUBROUTINE blk_oce_2
@@ -1110,8 +1116,8 @@ CONTAINS
          END_2D
          CALL lbc_lnk( 'sbcblk', putaui, 'U', -1._wp, pvtaui, 'V', -1._wp )
          !
-         IF(sn_cfctl%l_prtctl)  CALL prt_ctl( tab2d_1=putaui  , clinfo1=' blk_ice: putaui : '   &
-            &                               , tab2d_2=pvtaui  , clinfo2='          pvtaui : ' )
+         IF(sn_cfctl%l_prtctl)  CALL prt_ctl( tab2d_1=CASTDP(putaui), clinfo1=' blk_ice: putaui : ', mask1=umask   &
+            &                               , tab2d_2=CASTDP(pvtaui), clinfo2='          pvtaui : ', mask2=vmask )
       ELSE ! ln_abl
 
          DO_2D( nn_hls, nn_hls, nn_hls, nn_hls )
@@ -1123,7 +1129,7 @@ CONTAINS
 
       ENDIF ! ln_blk  / ln_abl
       !
-      IF(sn_cfctl%l_prtctl)  CALL prt_ctl(tab2d_1=wndm_ice  , clinfo1=' blk_ice: wndm_ice : ')
+      IF(sn_cfctl%l_prtctl)  CALL prt_ctl(tab2d_1=CASTDP(wndm_ice), clinfo1=' blk_ice: wndm_ice : ', mask1=tmask )
       !
    END SUBROUTINE blk_ice_1
 
@@ -1155,6 +1161,7 @@ CONTAINS
       REAL(wp) ::   zst, zst3, zsq, zsipt    ! local variable
       REAL(wp) ::   zcoef_dqlw, zcoef_dqla   !   -      -
       REAL(wp) ::   zztmp, zzblk, zztmp1, z1_rLsub   !   -      -
+      REAL(wp), DIMENSION(:,:,:), ALLOCATABLE ::   zmsk   ! temporary mask for prt_ctl
       REAL(wp), DIMENSION(jpi,jpj,jpl) ::   z_qlw         ! long wave heat flux over ice
       REAL(wp), DIMENSION(jpi,jpj,jpl) ::   z_qsb         ! sensible  heat flux over ice
       REAL(wp), DIMENSION(jpi,jpj,jpl) ::   z_dqlw        ! long wave heat sensitivity over ice
@@ -1319,12 +1326,23 @@ CONTAINS
       ENDIF
       !
       IF(sn_cfctl%l_prtctl) THEN
-         CALL prt_ctl(tab3d_1=qla_ice , clinfo1=' blk_ice: qla_ice  : ', tab3d_2=z_qsb   , clinfo2=' z_qsb    : ', kdim=jpl)
-         CALL prt_ctl(tab3d_1=z_qlw   , clinfo1=' blk_ice: z_qlw    : ', tab3d_2=dqla_ice, clinfo2=' dqla_ice : ', kdim=jpl)
-         CALL prt_ctl(tab3d_1=z_dqsb  , clinfo1=' blk_ice: z_dqsb   : ', tab3d_2=z_dqlw  , clinfo2=' z_dqlw   : ', kdim=jpl)
-         CALL prt_ctl(tab3d_1=dqns_ice, clinfo1=' blk_ice: dqns_ice : ', tab3d_2=qsr_ice , clinfo2=' qsr_ice  : ', kdim=jpl)
-         CALL prt_ctl(tab3d_1=ptsu    , clinfo1=' blk_ice: ptsu     : ', tab3d_2=qns_ice , clinfo2=' qns_ice  : ', kdim=jpl)
-         CALL prt_ctl(tab2d_1=tprecip , clinfo1=' blk_ice: tprecip  : ', tab2d_2=sprecip , clinfo2=' sprecip  : ')
+         ALLOCATE(zmsk(jpi,jpj,jpl))
+         DO jl = 1, jpl
+            zmsk(:,:,jl) = tmask(:,:,1)
+         END DO
+         CALL prt_ctl(tab3d_1=CASTDP(qla_ice) , clinfo1=' blk_ice: qla_ice  : ', mask1=zmsk,   &
+            &         tab3d_2=CASTDP(z_qsb)   , clinfo2=' z_qsb    : '         , mask2=zmsk, kdim=jpl)
+         CALL prt_ctl(tab3d_1=CASTDP(z_qlw)   , clinfo1=' blk_ice: z_qlw    : ', mask1=zmsk,   &
+            &         tab3d_2=CASTDP(dqla_ice), clinfo2=' dqla_ice : '         , mask2=zmsk, kdim=jpl)
+         CALL prt_ctl(tab3d_1=CASTDP(z_dqsb)  , clinfo1=' blk_ice: z_dqsb   : ', mask1=zmsk,   &
+            &         tab3d_2=CASTDP(z_dqlw)  , clinfo2=' z_dqlw   : '         , mask2=zmsk, kdim=jpl)
+         CALL prt_ctl(tab3d_1=CASTDP(dqns_ice), clinfo1=' blk_ice: dqns_ice : ', mask1=zmsk,   &
+            &         tab3d_2=CASTDP(qsr_ice) , clinfo2=' qsr_ice  : '         , mask2=zmsk, kdim=jpl)
+         CALL prt_ctl(tab3d_1=CASTDP(ptsu)    , clinfo1=' blk_ice: ptsu     : ', mask1=zmsk,   &
+            &         tab3d_2=CASTDP(qns_ice) , clinfo2=' qns_ice  : '         , mask2=zmsk, kdim=jpl)
+         CALL prt_ctl(tab2d_1=CASTDP(tprecip) , clinfo1=' blk_ice: tprecip  : ', mask1=tmask,   &
+            &         tab2d_2=CASTDP(sprecip) , clinfo2=' sprecip  : '         , mask2=tmask         )
+         DEALLOCATE(zmsk)
       ENDIF
 
       !#LB:

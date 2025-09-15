@@ -105,9 +105,11 @@ MODULE sbc_oce
    !!                                   !!   now    ! before   !!
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) ::   utau   , utau_b   !: sea surface i-stress (ocean referential)     [N/m2]
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) ::   vtau   , vtau_b   !: sea surface j-stress (ocean referential)     [N/m2]
-!CT SEDNA { add the output of 10m wind speed
+!CT CREG { add the output of 10m wind speed
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) ::   uw10   , vw10     !: 10m wind speed [ij]                          [m/s]
-!CT SEDNA } add the output of 10m wind speed
+!CT CREG } add the output of 10m wind speed
+   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) ::   uiceoc , uiceoc_b !: sea surface i-stress (ice-ocean)             [N/m2]
+   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) ::   viceoc , viceoc_b !: sea surface j-stress (ice-ocean)             [N/m2]
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) ::   utau_icb, vtau_icb !: sea surface (i,j)-stress used by icebergs   [N/m2]
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) ::   taum              !: module of sea surface stress (at T-point)    [N/m2]
    !! wndm is used compute surface gases exchanges in ice-free ocean or leads
@@ -129,7 +131,7 @@ MODULE sbc_oce
    !!
    !!
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) ::   tprecip           !: total precipitation                          [Kg/m2/s]
-   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) ::   sprecip           !: solid precipitation                          [Kg/m2/s]
+   REAL(dp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) ::   sprecip           !: solid precipitation                          [Kg/m2/s]
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) ::   fr_i              !: ice fraction = 1 - lead fraction      (between 0 to 1)
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:) ::   atm_co2           !: atmospheric pCO2                             [ppm]
    REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:) :: xcplmask          !: coupling mask for ln_mixcpl (warning: allocated in sbccpl)
@@ -181,9 +183,9 @@ CONTAINS
       ierr(:) = 0
       !
       ALLOCATE( utau(jpi,jpj) , utau_b(jpi,jpj) , taum(jpi,jpj) ,     &
-!CT for SEDNA { add the output of 10m wind speed
+!CT for CREG { add the output of 10m wind speed
                 uw10(jpi,jpj) , vw10(jpi,jpj)                   ,     &
-!CT for SEDNA } add the output of 10m wind speed
+!CT for CREG } add the output of 10m wind speed
          &      vtau(jpi,jpj) , vtau_b(jpi,jpj) , wndm(jpi,jpj) , rhoa(jpi,jpj) , STAT=ierr(1) )
       !
       ALLOCATE( qns_tot(jpi,jpj) , qns  (jpi,jpj) , qns_b(jpi,jpj),        &

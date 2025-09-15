@@ -37,6 +37,7 @@ MODULE zdfmxl
 
    !! * Substitutions
 #  include "do_loop_substitute.h90"
+#  include "single_precision_substitute.h90"
 #  include "domzgr_substitute.h90"
    !!----------------------------------------------------------------------
    !! NEMO/OCE 4.0 , NEMO Consortium (2018)
@@ -88,10 +89,12 @@ CONTAINS
          ENDIF
       ENDIF
       !
-! START More precise MLD calculation { 
       ! w-level of the mixing and mixed layers
       DO_2D_OVR( nn_hls, nn_hls, nn_hls, nn_hls )
+!CT CREG  START More precise MLD calculation { 
+         !nmln(ji,jj)  = nlb10                  ! Initialization to the number of w ocean point
          nmln(ji,jj)  = 2                      ! Initialization to the number of w ocean point
+!CT CREG  START More precise MLD calculation { 
          hmlp(ji,jj)  = 0._wp                  ! here hmlp used as a dummy variable, integrating vertically N^2
       END_2D
       zN2_c = grav * rho_c * r1_rho0      ! convert density criteria into N^2 criteria
@@ -108,8 +111,6 @@ CONTAINS
          hmlpt(ji,jj) = gdept(ji,jj,iik-1,Kmm) * ssmask(ji,jj)    ! depth of the last T-point inside the mixed layer
       END_2D
       !
-! END More precise MLD calculation } 
-      !
       IF( .NOT.l_offline .AND. iom_use("mldr10_1") ) THEN
          IF( .NOT. l_istiled .OR. ntile == nijtile ) THEN         ! Do only on the last tile
             IF( ln_isfcav ) THEN  ;  CALL iom_put( "mldr10_1", hmlp - risfdep)   ! mixed layer thickness
@@ -118,7 +119,7 @@ CONTAINS
          ENDIF
       ENDIF
       !
-      IF(sn_cfctl%l_prtctl)   CALL prt_ctl( tab2d_1=REAL(nmln,wp), clinfo1=' nmln : ', tab2d_2=hmlp, clinfo2=' hmlp : ' )
+      IF(sn_cfctl%l_prtctl)   CALL prt_ctl( tab2d_1=REAL(nmln,dp), clinfo1=' nmln : ', tab2d_2=CASTDP(hmlp), clinfo2=' hmlp : ' )
       !
    END SUBROUTINE zdf_mxl
 

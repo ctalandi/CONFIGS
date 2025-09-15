@@ -33,11 +33,11 @@ MODULE dtatsd
    LOGICAL , PUBLIC ::   ln_tsd_init   !: T & S data flag
    LOGICAL , PUBLIC ::   ln_tsd_dmp    !: internal damping toward input data flag
 
-!CT for SEDNA { 
+!CT CREG { 
    !TYPE(FLD), ALLOCATABLE, DIMENSION(:) ::   sf_tsd   ! structure of input SST (file informations, fields read)
    TYPE(FLD), TARGET, ALLOCATABLE, DIMENSION(:) ::   sf_tsd_ini   ! structure of input TS ini (file informations, fields read)
    TYPE(FLD), TARGET, ALLOCATABLE, DIMENSION(:) ::   sf_tsd_dmp   ! structure of input TS dmp (file informations, fields read)
-!CT for SEDNA }
+!CT CREG }
 
    !! * Substitutions
 #  include "do_loop_substitute.h90"
@@ -62,7 +62,7 @@ CONTAINS
       INTEGER ::   ios, ierr0, ierr1, ierr2, ierr3   ! local integers
       !!
       CHARACTER(len=100)            ::   cn_dir          ! Root directory for location of ssr files
-!CT for SEDNA { 
+!CT CREG { 
       TYPE(FLD_N), DIMENSION( jpts) ::   slf_i_ini       ! array of namelist informations on the fields to read
       TYPE(FLD_N), DIMENSION( jpts) ::   slf_i_dmp       ! array of namelist informations on the fields to read
       TYPE(FLD_N)                   ::   sn_tem_ini, sn_sal_ini
@@ -72,7 +72,7 @@ CONTAINS
       !!
       !NAMELIST/namtsd/   ln_tsd_init, ln_tsd_dmp, cn_dir, sn_tem, sn_sal
       NAMELIST/namtsd/   ln_tsd_init, ln_tsd_dmp, cn_dir, sn_tem_ini, sn_sal_ini, sn_tem_dmp, sn_sal_dmp
-!CT for SEDNA { 
+!CT CREG } 
       !!----------------------------------------------------------------------
       !
       !  Initialisation
@@ -94,7 +94,7 @@ CONTAINS
          WRITE(numout,*) '      Initialisation of ocean T & S with T &S input data   ln_tsd_init = ', ln_tsd_init
          WRITE(numout,*) '      damping of ocean T & S toward T &S input data        ln_tsd_dmp  = ', ln_tsd_dmp
          WRITE(numout,*)
-!CT for SEDNA { 
+!CT CREG { 
          IF( .NOT.ln_tsd_init ) THEN
             WRITE(numout,*)
             WRITE(numout,*) '   ===>>   T & S initial data not used'
@@ -107,7 +107,7 @@ CONTAINS
          !   WRITE(numout,*)
          !   WRITE(numout,*) '   ===>>   T & S data not used'
          !ENDIF
-!CT for SEDNA }
+!CT CREG }
       ENDIF
       !
       IF( ln_rstart .AND. ln_tsd_init ) THEN
@@ -117,7 +117,7 @@ CONTAINS
       ENDIF
       !
       !                             ! allocate the arrays (if necessary)
-!CT for SEDNA {
+!CT CREG {
       !IF( ln_tsd_init .OR. ln_tsd_dmp ) THEN
       !   !
       !   ALLOCATE( sf_tsd(jpts), STAT=ierr0 )
@@ -179,7 +179,7 @@ CONTAINS
          CALL fld_fill( sf_tsd_dmp, slf_i_dmp, cn_dir, 'dta_tsd', 'Damping Temperature & Salinity data', 'namtsd' )
          !
       ENDIF
-!CT for SEDNA }
+!CT CREG }
       !
    END SUBROUTINE dta_tsd_init
 
@@ -199,27 +199,27 @@ CONTAINS
       !! ** Action  :   ptsd   T-S data on medl mesh and interpolated at time-step kt
       !!----------------------------------------------------------------------
       INTEGER                          , INTENT(in   ) ::   kt     ! ocean time-step
-      REAL(wp), DIMENSION(A2D(nn_hls),jpk,jpts), INTENT(  out) ::   ptsd   ! T & S data
+      REAL(dp), DIMENSION(A2D(nn_hls),jpk,jpts), INTENT(  out) ::   ptsd   ! T & S data
       !
       INTEGER ::   ji, jj, jk, jl, jkk   ! dummy loop indicies
       INTEGER ::   ik, il0, il1, ii0, ii1, ij0, ij1   ! local integers
       INTEGER, DIMENSION(jpts), SAVE :: irec_b, irec_n
-      REAL(wp)::   zl, zi                             ! local scalars
-      REAL(wp), DIMENSION(jpk) ::  ztp, zsp   ! 1D workspace
-!CT for SEDNA {
+      REAL(dp)::   zl, zi                             ! local scalars
+      REAL(dp), DIMENSION(jpk) ::  ztp, zsp   ! 1D workspace
+!CT CREG {
       TYPE(FLD), POINTER, DIMENSION(:) ::  sf_tsd     ! structure of input TS dmp (file informations, fields read)
-!CT for SEDNA }
+!CT CREG }
       !!----------------------------------------------------------------------
       !
       IF( .NOT. l_istiled .OR. ntile == 1 )  THEN                                         ! Do only for the full domain
          IF( ln_tile ) CALL dom_tile_stop( ldhold=.TRUE. )             ! Use full domain
-!CT for SEDNA {
+!CT CREG {
          IF ( ln_tsd_init ) THEN   ! when called for initialization ( from istate)
             sf_tsd => sf_tsd_ini
          ELSE                      ! called from tradmp
             sf_tsd => sf_tsd_dmp
          ENDIF
-!CT for SEDNA }
+!CT CREG }
             CALL fld_read( kt, 1, sf_tsd )   !==   read T & S data at kt time step   ==!
       !
       !
@@ -273,7 +273,6 @@ CONTAINS
          ptsd(ji,jj,jk,jp_sal) = sf_tsd(jp_sal)%fnow(ji,jj,jk)
       END_3D
       !
-! JC I think it's more convenient to consider the general sco case as the rule
       IF( ln_sco ) THEN                   !==   s- or mixed s-zps-coordinate   ==!
          !
          IF( .NOT. l_istiled .OR. ntile == 1 )  THEN                       ! Do only on the first tile
@@ -312,6 +311,10 @@ CONTAINS
          !
       ELSE                                !==   z- or zps- coordinate   ==!
          !
+         ! We must keep this definition in a case different from the general case of s-coordinate as we don't
+         ! want to use "underground" values (levels below ocean bottom) to be able to start the model from
+         ! masked temp and sal (read for example in a restart or in output.init)
+         !
          DO_3D( nn_hls, nn_hls, nn_hls, nn_hls, 1, jpk )
             ptsd(ji,jj,jk,jp_tem) = ptsd(ji,jj,jk,jp_tem) * tmask(ji,jj,jk)    ! Mask
             ptsd(ji,jj,jk,jp_sal) = ptsd(ji,jj,jk,jp_sal) * tmask(ji,jj,jk)
@@ -336,7 +339,7 @@ CONTAINS
          !
       ENDIF
       !
-!CT for SEDNA {
+!CT CREG {
       !IF( .NOT.ln_tsd_dmp ) THEN                   !==   deallocate T & S structure   ==! 
       !   !                                              (data used only for initialisation)
       !   IF(lwp) WRITE(numout,*) 'dta_tsd: deallocte T & S arrays as they are only use to initialize the run'
@@ -357,7 +360,7 @@ CONTAINS
          ! un-set ln_tsd_init for further call
          ln_tsd_init =.FALSE.
       ENDIF
-!CT for SEDNA }
+!CT CREG }
       !
    END SUBROUTINE dta_tsd
 

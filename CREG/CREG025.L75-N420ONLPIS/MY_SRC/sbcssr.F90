@@ -16,9 +16,9 @@ MODULE sbcssr
    USE sbc_oce        ! surface boundary condition
    USE phycst         ! physical constants
    USE sbcrnf         ! surface boundary condition : runoffs
-!CT for SEDNA !!{ DRAKKAR 
+!CT CREG { DRAKKAR 
    USE shapiro        ! used in case of ln_sssr_flt
-!CT for SEDNA !!}
+!CT CREG }
    !
    USE fldread        ! read input fields
    USE in_out_manager ! I/O manager
@@ -26,9 +26,9 @@ MODULE sbcssr
    USE lib_mpp        ! distribued memory computing library
    USE lbclnk         ! ocean lateral boundary conditions (or mpp link)
    USE lib_fortran    ! Fortran utilities (allows no signed zero when 'key_nosignedzero' defined)  
-!CT for SEDNA add the function to compute frezing point {
+!CT CREG {
    USE eosbn2         ! equation of state
-!CT for SEDNA add the function to compute frezing point }
+!CT CREG }
 
    IMPLICIT NONE
    PRIVATE
@@ -49,22 +49,22 @@ MODULE sbcssr
    LOGICAL         ::   ln_sssr_bnd     ! flag to bound erp term 
    REAL(wp)        ::   rn_sssr_bnd     ! ABS(Max./Min.) value of erp term [mm/day]
    INTEGER         ::   nn_sssr_ice     ! Control of restoring under ice
-!CT for SEDNA from { DRAKKAR 
+!CT CREG { DRAKKAR 
    LOGICAL, PUBLIC ::   ln_sssr_flt     ! flag to filter sss for restoring
    INTEGER, PUBLIC ::   nn_shap_iter    ! number of iteration for shapiro
    LOGICAL, PUBLIC ::   ln_sssr_ice     ! flag to turn off/on SSS restoring under Sea-ice
-!CT for SEDNA }
+!CT CREG }
 
    REAL(wp) , ALLOCATABLE, DIMENSION(:) ::   buffer   ! Temporary buffer for exchange
    TYPE(FLD), ALLOCATABLE, DIMENSION(:) ::   sf_sst   ! structure of input SST (file informations, fields read)
    TYPE(FLD), ALLOCATABLE, DIMENSION(:) ::   sf_sss   ! structure of input SSS (file informations, fields read)
-!CT for SEDNA from { DRAKKAR : limit sss restoring in the coastal area
+!CT CREG { DRAKKAR : limit sss restoring in the coastal area
    LOGICAL         :: ln_sssr_msk
    TYPE(FLD_N)     :: sn_coast
    REAL(wp), PUBLIC, ALLOCATABLE, DIMENSION(:,:) :: distcoast   ! use to read the distance and then for weight purpose
 
    REAL(wp)        :: rn_dist      ! (km) decaying lenght scale for SSS restoring near the coast
-!CT for SEDNA }
+!CT CREG }
 
    !! * Substitutions
 #  include "do_loop_substitute.h90"
@@ -97,12 +97,12 @@ CONTAINS
       REAL(wp) ::   zsrp     ! local scalar for unit conversion of rn_deds factor
       REAL(wp) ::   zerp_bnd ! local scalar for unit conversion of rn_epr_max factor
       INTEGER  ::   ierror   ! return error code
-!CT for SEDNA from { DRAKKAR 
+!CT CREG { DRAKKAR 
       REAL(wp) , DIMENSION (jpi,jpj) :: zsss_m ! temporary array
 
       REAL(wp) , DIMENSION (jpi,jpj) :: zsssr_ice ! temporary array
       REAL(wp) , DIMENSION (jpi,jpj) :: zt_fzp    ! temporary array
-!CT for SEDNA }
+!CT CREG }
       !!
       CHARACTER(len=100) ::  cn_dir          ! Root directory for location of ssr files
       TYPE(FLD_N) ::   sn_sst, sn_sss        ! informations about the fields to be read
@@ -113,24 +113,23 @@ CONTAINS
          IF( nn_sstr == 1)   CALL fld_read( kt, nn_fsbc, sf_sst )   ! Read SST data and provides it at kt
          IF( nn_sssr >= 1)   CALL fld_read( kt, nn_fsbc, sf_sss )   ! Read SSS data and provides it at kt
          !
-!CT for SEDNA { Read climatological temparature to avoid SSS restoring in areas where it is close to the freezing point {
+!CT CREG { Read climatological temparature to avoid SSS restoring in areas where it is close to the freezing point {
          IF ( .NOT. ln_sssr_ice) THEN
              CALL fld_read( kt, nn_fsbc, sf_sst )   ! Read SST data and provides it at kt
          ENDIF
-!CT for SEDNA } Read climatological temparature to avoid SSS restoring in areas where it is close to the freezing point }
+!CT CREG } Read climatological temparature to avoid SSS restoring in areas where it is close to the freezing point }
          !                                         ! ========================= !
          IF( MOD( kt-1, nn_fsbc ) == 0 ) THEN      !    Add restoring term     !
             !                                      ! ========================= !
             !
-            qrp(:,:) = 0._wp ! necessary init
-            erp(:,:) = 0._wp
-            !
-            IF( nn_sstr == 1 ) THEN                                   !* Temperature restoring term
+            IF(     nn_sstr == 1 ) THEN                                   !* Temperature restoring term
                DO_2D( nn_hls, nn_hls, nn_hls, nn_hls )
                   zqrp = rn_dqdt * ( sst_m(ji,jj) - sf_sst(1)%fnow(ji,jj,1) ) * tmask(ji,jj,1)
                   qns(ji,jj) = qns(ji,jj) + zqrp
                   qrp(ji,jj) = zqrp
                END_2D
+            ELSEIF( nn_sssr == 2 ) THEN
+               qrp(:,:) = 0._wp   ! necessary init, see bellow: qrp(ji,jj) = qrp(ji,jj) - ...
             ENDIF
             !
             IF( nn_sssr /= 0 .AND. nn_sssr_ice /= 1 ) THEN
@@ -157,16 +156,16 @@ CONTAINS
             ELSEIF( nn_sssr == 2 ) THEN                               !* Salinity damping term (volume flux (emp) and associated heat flux (qns)
                zsrp = rn_deds / rday                                  ! from [mm/day] to [kg/m2/s]
                zerp_bnd = rn_sssr_bnd / rday                          !       -              -    
-!CT for SEDNA { from DRAKKAR using filtered sss for restoring 
+!CT CREG { from DRAKKAR using filtered sss for restoring 
                IF (ln_sssr_flt ) THEN
                   CALL Shapiro_1D ( sss_m(:,:), nn_shap_iter, 'ORCA_GLOB', zsss_m )
                   zsss_m = zsss_m * tmask(:,:,1)
                ELSE
                   zsss_m = sss_m * tmask(:,:,1)
                ENDIF
-!CT for SEDNA } using filtered sss for restoring 
+!CT CREG }
 
-!CT for SEDNA turn on/off damping under sea-ice {
+!CT CREG { turn on/off damping under sea-ice 
                zsssr_ice(:,:) = 1._wp
                IF ( .NOT. ln_sssr_ice ) THEN
                    WHERE( fr_i(:,:) > 0._wp ) zsssr_ice(:,:) = 0._wp
@@ -175,10 +174,10 @@ CONTAINS
                ! temperature, i.e. with potential sea-ice  
                CALL eos_fzp( sf_sss(1)%fnow(:,:,1), zt_fzp(:,:) )
                WHERE( sf_sst(1)%fnow(:,:,1) <= zt_fzp(:,:) ) zsssr_ice(:,:) = 0._wp
-!CT for SEDNA turn on/off damping under sea-ice } 
+!CT CREG } 
 
                DO_2D( nn_hls, nn_hls, nn_hls, nn_hls )
-!CT for SEDNA { from DRAKKAR : using filtered sss for restoring 
+!CT CREG { from DRAKKAR : using filtered sss for restoring 
                   !zerp = zsrp * ( 1. - 2.*rnfmsk(ji,jj) )   &      ! No damping in vicinity of river mouths
                   !   &        *   coefice(ji,jj)            &      ! Optional control of damping under sea-ice
                   !   &        * ( sss_m(ji,jj) - sf_sss(1)%fnow(ji,jj,1) )   &
@@ -198,6 +197,7 @@ CONTAINS
                   erp(ji,jj) = zerp * zsssr_ice(ji,jj)
                   qrp(ji,jj) = qrp(ji,jj) - zerp * rcp * sst_m(ji,jj) * zsssr_ice(ji,jj)
                END_2D
+!CT CREG }
             ENDIF
             ! outputs
             CALL iom_put( 'hflx_ssr_cea', qrp(:,:) )
@@ -227,18 +227,18 @@ CONTAINS
       REAL(wp) ::   zerp_bnd ! local scalar for unit conversion of rn_epr_max factor
       INTEGER  ::   ierror   ! return error code
       !!
-!CT for SEDNA !!{ DRAKKAR 
+!CT CREG { DRAKKAR 
       INTEGER  ::   ii0, ii1, ii2, ij0, ij1, ij2, inum
       REAL(wp) ::   zalph
       CHARACTER(LEN=100) ::  cl_coastfile
-!!CT for SEDNA !}
+!!CT CREG }
       CHARACTER(len=100) ::  cn_dir          ! Root directory for location of ssr files
       TYPE(FLD_N) ::   sn_sst, sn_sss        ! informations about the fields to be read
       NAMELIST/namsbc_ssr/ cn_dir, nn_sstr, nn_sssr, rn_dqdt, rn_deds, sn_sst, &
               & sn_sss, ln_sssr_bnd, rn_sssr_bnd, nn_sssr_ice
-!!CT for SEDNA !{ DRAKKAR 
+!!CT CREG { DRAKKAR 
       NAMELIST/namsbc_ssr/ ln_sssr_flt, ln_sssr_msk, sn_coast, rn_dist, nn_shap_iter, ln_sssr_ice
-!!CT for SEDNA !}
+!!CT CREG }
       INTEGER     ::  ios
       !!----------------------------------------------------------------------
       !
@@ -268,7 +268,7 @@ CONTAINS
          WRITE(numout,*) '          ( 0 = no restoration under ice)'
          WRITE(numout,*) '          ( 1 = restoration everywhere  )'
          WRITE(numout,*) '          (>1 = enhanced restoration under ice  )'
-!CT for SEDNA !!{ DRAKKAR 
+!CT CREG { DRAKKAR 
          WRITE(numout,*) '      Filtering of sss for restoring         ln_sssr_flt = ', ln_sssr_flt 
          WRITE(numout,*) '      Apply SSS restoring under sea-ice      ln_sssr_ice = ', ln_sssr_ice 
          WRITE(numout,*) '         ln_sssr_ice overright the nn_sssr_ice official parameter'
@@ -277,7 +277,7 @@ CONTAINS
          ENDIF
          WRITE(numout,*) '      Limit sss restoring near the coast     ln_sssr_msk = ', ln_sssr_msk
          IF ( ln_sssr_msk ) WRITE(numout,*) '      Decaying lenght scale from the coast   rn_dist     = ', rn_dist, ' km'
-!CT for SEDNA !!}
+!CT CREG }
       ENDIF
       !
       IF( nn_sstr == 1 ) THEN      !* set sf_sst structure & allocate arrays
@@ -306,7 +306,7 @@ CONTAINS
          IF( sf_sss(1)%ln_tint )   ALLOCATE( sf_sss(1)%fdta(jpi,jpj,1,2), STAT=ierror )
          IF( ierror > 0 )   CALL ctl_stop( 'STOP', 'sbc_ssr: unable to allocate sf_sss data array' )
          !
-!CT for SEDNA { Required to avoid SSS restoring in areas where climatology temperature is close to the freezing point }
+!CT CREG { Required to avoid SSS restoring in areas where climatology temperature is close to the freezing point }
          IF ( .NOT. ln_sssr_ice) THEN
              ALLOCATE( sf_sst(1), STAT=ierror )
              IF( ierror > 0 )   CALL ctl_stop( 'STOP', 'sbc_ssr: unable to allocate sf_sst structure' )
@@ -318,8 +318,8 @@ CONTAINS
              IF( sf_sst(1)%ln_tint )   ALLOCATE( sf_sst(1)%fdta(jpi,jpj,1,2), STAT=ierror )
              IF( ierror > 0 )   CALL ctl_stop( 'STOP', 'sbc_ssr: unable to allocate sf_sst data array' )
          ENDIF
-!CT for SEDNA } Required to avoid SSS restoring in areas where climatology temperature is close to the freezing point }
-!for SEDNA !!{ DRAKKAR 
+!CT CREG } 
+!CT CREG { DRAKKAR 
          ! if masking of coastal area is used
          IF ( ln_sssr_msk ) THEN
             ALLOCATE( distcoast(jpi,jpj),STAT=ierror )  
@@ -332,13 +332,13 @@ CONTAINS
             rn_dist=rn_dist*1000.  ! tranform rn_dist to m
             distcoast(:,:)=0.5*(tanh(3.*(distcoast(:,:)*distcoast(:,:)/rn_dist/rn_dist - 1 )) + 1 )
          ENDIF
-!CT for SEDNA !!}
+!CT CREG }
       ENDIF
       !
       coefice(:,:) = 1._wp         !  Initialise coefice to 1._wp ; will not need to be changed if nn_sssr_ice=1
       !                            !* Initialize qrp and erp if no restoring 
-      IF( nn_sstr /= 1                   )   qrp(:,:) = 0._wp
-      IF( nn_sssr /= 1 .OR. nn_sssr /= 2 )   erp(:,:) = 0._wp
+      IF( nn_sstr /= 1 .AND. nn_sssr /= 2 )   qrp(:,:) = 0._wp
+      IF( nn_sssr /= 1 .AND. nn_sssr /= 2 )   erp(:,:) = 0._wp
       !
    END SUBROUTINE sbc_ssr_init
          

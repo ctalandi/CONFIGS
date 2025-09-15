@@ -24,6 +24,7 @@ MODULE iceupdate
    USE traqsr         ! add penetration of solar flux in the calculation of heat budget
    USE icectl         ! sea-ice: control prints
    USE zdfdrg  , ONLY : ln_drgice_imp
+   USE trd_oce , ONLY : l_trddyn         ! dynamics trends diagnostics
    !
    USE in_out_manager ! I/O manager
    USE iom            ! I/O manager library
@@ -31,7 +32,7 @@ MODULE iceupdate
    USE lib_fortran    ! fortran utilities (glob_sum + no signed zero)
    USE lbclnk         ! lateral boundary conditions (or mpp links)
    USE timing         ! Timing
-
+   USE oce
    IMPLICIT NONE
    PRIVATE
 
@@ -40,10 +41,10 @@ MODULE iceupdate
    PUBLIC   ice_update_tau    ! called by ice_stp
 
    REAL(wp), ALLOCATABLE, SAVE, DIMENSION(:,:) ::   utau_oce, vtau_oce   ! air-ocean surface i- & j-stress     [N/m2]
-!CT for SEDNA {
+!CT CREG {
    REAL(wp), ALLOCATABLE, SAVE, DIMENSION(:,:) ::   utau_iceoce, vtau_iceoce   ! ice-ocean surface i- & j-stress     [N/m2]
    REAL(wp), ALLOCATABLE, SAVE, DIMENSION(:,:) ::   utau_atmoce, vtau_atmoce   ! atm-ocean surface i- & j-stress     [N/m2]
-!CT for SEDNA }
+!CT CREG }
    REAL(wp), ALLOCATABLE, SAVE, DIMENSION(:,:) ::   tmod_io              ! modulus of the ice-ocean velocity   [m/s]
 
    !! * Substitutions
@@ -59,7 +60,7 @@ CONTAINS
       !!-------------------------------------------------------------------
       !!             ***  ROUTINE ice_update_alloc ***
       !!-------------------------------------------------------------------
-!CT for SEDNA {
+!CT CREG {
       ALLOCATE( utau_oce(jpi,jpj), vtau_oce(jpi,jpj) ,          & 
          &      utau_iceoce(jpi,jpj) , vtau_iceoce(jpi,jpj) ,   &                
          &      utau_atmoce(jpi,jpj) , vtau_atmoce(jpi,jpj) ,   &                
@@ -69,7 +70,7 @@ CONTAINS
       vtau_iceoce(:,:)=0.0_wp
       utau_atmoce(:,:)=0.0_wp
       vtau_atmoce(:,:)=0.0_wp
-!CT for SEDNA {
+!CT CREG {
       !
       CALL mpp_sum( 'iceupdate', ice_update_alloc )
       IF( ice_update_alloc /= 0 )   CALL ctl_stop( 'STOP', 'ice_update_alloc: failed to allocate arrays' )
@@ -397,28 +398,32 @@ CONTAINS
          zat_v  = ( at_i(ji,jj) * tmask(ji,jj,1) + at_i (ji  ,jj+1  ) * tmask(ji  ,jj+1,1) )  &
             &     / MAX( 1.0_wp , tmask(ji,jj,1) + tmask(ji  ,jj+1,1) )
          !                                                   ! linearized quadratic drag formulation
-         ! Bug correction
-         zutau_ice   = 0.5_wp * ( tmod_io(ji,jj) + tmod_io(ji+1,jj) ) * ( u_ice(ji,jj) - zflagi*pu_oce(ji,jj) )
-         zvtau_ice   = 0.5_wp * ( tmod_io(ji,jj) + tmod_io(ji,jj+1) ) * ( v_ice(ji,jj) - zflagi*pv_oce(ji,jj) )
-         !zutau_ice   = 0.5_wp * ( tmod_io(ji,jj) + tmod_io(ji+1,jj) ) * ( u_ice(ji,jj) - pu_oce(ji,jj) )
-         !zvtau_ice   = 0.5_wp * ( tmod_io(ji,jj) + tmod_io(ji,jj+1) ) * ( v_ice(ji,jj) - pv_oce(ji,jj) )
+         zutau_ice   = 0.5_wp * ( tmod_io(ji,jj) + tmod_io(ji+1,jj) ) * ( u_ice(ji,jj) - zflagi * pu_oce(ji,jj) )
+         zvtau_ice   = 0.5_wp * ( tmod_io(ji,jj) + tmod_io(ji,jj+1) ) * ( v_ice(ji,jj) - zflagi * pv_oce(ji,jj) )
          !                                                   ! stresses at the ocean surface
          utau(ji,jj) = ( 1._wp - zat_u ) * utau_oce(ji,jj) + zat_u * zutau_ice
          vtau(ji,jj) = ( 1._wp - zat_v ) * vtau_oce(ji,jj) + zat_v * zvtau_ice
-!CT for SEDNA {
+         !
+!CT CREG {
          utau_atmoce(ji,jj) = ( 1._wp - zat_u ) * utau_oce(ji,jj)
          vtau_atmoce(ji,jj) = ( 1._wp - zat_v ) * vtau_oce(ji,jj)
          utau_iceoce(ji,jj) = zat_u * zutau_ice
          vtau_iceoce(ji,jj) = zat_v * zvtau_ice
-!CT for SEDNA }
+!CT CREG }
+         !
+         IF( l_trddyn ) THEN
+            uiceoc(ji,jj) = zat_u * zutau_ice
+            viceoc(ji,jj) = zat_v * zvtau_ice
+         ENDIF
+         !
       END_2D
 
-!CT for SEDNA {
+!CT CREG {
       IF( iom_use('utau_iceoce'  ) )   CALL iom_put( "utau_iceoce", utau_iceoce )
       IF( iom_use('vtau_iceoce'  ) )   CALL iom_put( "vtau_iceoce", vtau_iceoce )
       IF( iom_use('utau_atmoce'  ) )   CALL iom_put( "utau_atmoce", utau_atmoce )
       IF( iom_use('vtau_atmoce'  ) )   CALL iom_put( "vtau_atmoce", vtau_atmoce )
-!CT for SEDNA }
+!CT CREG }
       CALL lbc_lnk( 'iceupdate', utau, 'U', -1.0_wp, vtau, 'V', -1.0_wp )   ! lateral boundary condition
       !
       IF( ln_timing )   CALL timing_stop('iceupdate')
@@ -476,12 +481,15 @@ CONTAINS
                CALL iom_get( numrir, jpdom_auto, 'snwice_mass_b', snwice_mass_b )
             ELSE                                     ! start from rest
                IF(lwp) WRITE(numout,*) '   ==>>   previous run without snow-ice mass output then set it'
-               snwice_mass  (:,:) = tmask(:,:,1) * ( rhos * vt_s(:,:) + rhoi * vt_i(:,:) )
+               snwice_mass  (:,:) = tmask(:,:,1) * ( rhos * vt_s(:,:) + rhoi * vt_i(:,:) & 
+                                                &  + rhow * (vt_ip(:,:) + vt_il(:,:))  )
                snwice_mass_b(:,:) = snwice_mass(:,:)
             ENDIF
          ELSE                                   !* Start from rest
+!JC: I think this is useless with what is now done in ice_istate
             IF(lwp) WRITE(numout,*) '   ==>>   start from rest: set the snow-ice mass'
-            snwice_mass  (:,:) = tmask(:,:,1) * ( rhos * vt_s(:,:) + rhoi * vt_i(:,:) )
+            snwice_mass  (:,:) = tmask(:,:,1) * ( rhos * vt_s(:,:) + rhoi * vt_i(:,:) & 
+                                             &  + rhow * (vt_ip(:,:) + vt_il(:,:))  )
             snwice_mass_b(:,:) = snwice_mass(:,:)
          ENDIF
          !

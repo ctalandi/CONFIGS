@@ -112,13 +112,13 @@ CONTAINS
       !!----------------------------------------------------------------------
       INTEGER ::   istp   ! time step index
       REAL(wp)::   zstptiming   ! elapsed time for 1 time step
-!CT for SEDNA { DRAKKAR 
+!CT for CREG { DRAKKAR 
       !! for timing each step
       CHARACTER(LEN=8)      :: cldate
       CHARACTER(LEN=10)     :: cltime
       CHARACTER(LEN=5)      :: clzone
       INTEGER, DIMENSION(8) :: ivalue
-!CT for SEDNA } DRAKKAR !
+!CT for CREG } DRAKKAR !
       !!----------------------------------------------------------------------
       !
 #if defined key_agrif
@@ -180,12 +180,12 @@ CONTAINS
                IF ( istp ==         nitend ) elapsed_time = zstptiming - elapsed_time
             ENDIF
             !
-!CT for SEDNA !{ DRAKKAR : print time step for run monitoring
+!CT for CREG !{ DRAKKAR : print time step for run monitoring
            IF (lwp ) THEN
              CALL DATE_AND_TIME(cldate,cltime,clzone,ivalue)
              print '(i8,1x,8i4)', istp, ivalue(:)   ! DRAKKAR code : print time step for run monitoring
            ENDIF
-!CT for SEDNA ! DRAKKAR }            
+!CT for CREG ! DRAKKAR }            
 #  if defined key_qco   ||   defined key_linssh
             CALL stp_MLF( istp )
 #  else
@@ -308,7 +308,7 @@ CONTAINS
       IF( lwm )   CALL ctl_opn(     numond, 'output.namelist.dyn', 'REPLACE', 'FORMATTED', 'SEQUENTIAL', -1, -1, .FALSE. )
       ! open /dev/null file to be able to supress output write easily
       IF( Agrif_Root() ) THEN
-                  CALL ctl_opn(     numnul,           '/dev/null', 'REPLACE', 'FORMATTED', 'SEQUENTIAL', -1, -1, .FALSE. )
+                  CALL ctl_opn(     numnul,           '/dev/null', 'UNKNOWN', 'FORMATTED', 'SEQUENTIAL', -1, -1, .FALSE. )
 #ifdef key_agrif
       ELSE
                   numnul = Agrif_Parent(numnul)
@@ -395,6 +395,7 @@ CONTAINS
       IF( nn_hls == 1 ) THEN
          CALL ctl_stop( 'STOP', 'nemogcm : Loop fusion can be used only with extra-halo' )
       ENDIF
+      CALL ctl_warn( 'nemo_init', 'you use key_loop_fusion, this may significantly slow down NEMO performances' )
 #endif
 
       CALL halo_mng_init()
