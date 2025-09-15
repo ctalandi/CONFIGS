@@ -128,10 +128,10 @@
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
-   sn_tem_ini  = 'woa09_temperature_monthly_1deg_t_an_CMA_drowned_Ex_L75' ,    -12     ,  't_an'   ,    .true.   , .true. , 'yearly'   , 'reshape_WOA09_REG1toCREG025_bilin.nc'  ,   ''    ,    ''
-   sn_sal_ini  = 'woa09_salinity_monthly_1deg_s_an_CMA_drowned_Ex_L75'    ,    -12     ,  's_an'   ,    .true.   , .true. , 'yearly'   , 'reshape_WOA09_REG1toCREG025_bilin.nc'  ,   ''    ,    ''
-   sn_tem_dmp  = 'woa09_temperature_monthly_1deg_t_an_CMA_drowned_Ex_L75' ,    -12     ,  't_an'   ,    .true.   , .true. , 'yearly'   , 'reshape_WOA09_REG1toCREG025_bilin.nc'  ,   ''    ,    ''
-   sn_sal_dmp  = 'woa09_salinity_monthly_1deg_s_an_CMA_drowned_Ex_L75'    ,    -12     ,  's_an'   ,    .true.   , .true. , 'yearly'   , 'reshape_WOA09_REG1toCREG025_bilin.nc'  ,   ''    ,    ''
+   sn_tem_ini  = 'woa09_ConTem_monthly_1deg_CT_CMA_drowned_Ex_L75_SM5'   ,    -12     ,  'CT'   ,    .true.   , .true. , 'yearly'   , 'reshape_WOA09_REG1toCREG025_bilin.nc'  ,   ''    ,    ''
+   sn_sal_ini  = 'woa09_SalAbs_monthly_1deg_SA_CMA_drowned_Ex_L75_SM5'   ,    -12     ,  'SA'   ,    .true.   , .true. , 'yearly'   , 'reshape_WOA09_REG1toCREG025_bilin.nc'  ,   ''    ,    ''
+   sn_tem_dmp  = 'woa09_ConTem_monthly_1deg_CT_CMA_drowned_Ex_L75_SM5'   ,    -12     ,  'CT'   ,    .true.   , .true. , 'yearly'   , 'reshape_WOA09_REG1toCREG025_bilin.nc'  ,   ''    ,    ''
+   sn_sal_dmp  = 'woa09_SalAbs_monthly_1deg_SA_CMA_drowned_Ex_L75_SM5'   ,    -12     ,  'SA'   ,    .true.   , .true. , 'yearly'   , 'reshape_WOA09_REG1toCREG025_bilin.nc'  ,   ''    ,    ''
 /
 !-----------------------------------------------------------------------
 &namwad        !   Wetting and Drying (WaD)                             (default: OFF)
@@ -473,8 +473,8 @@
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
-   sn_sst      = 'woa09_sst01-12_monthly_1deg_t_an_CMA_drowned_Ex_L75'  ,        -12   ,  't_an'    ,    .true.    , .true. , 'yearly'   , 'SST_reshape_WOA09_REG1toCREG025_bilin.nc'       , ''       , ''
-   sn_sss      = 'woa09_sss01-12_monthly_1deg_s_an_CMA_drowned_Ex_L75'  ,        -12   ,  's_an'    ,    .true.    , .true. , 'yearly'   , 'SSS_reshape_WOA09_REG1toCREG025_bilin.nc'       , ''       , ''
+   sn_sst      = 'woa09_CTsst01-12_monthly_1deg_CT_CMA_drowned_Ex_L75_SM5'  ,        -12   ,  'CT'    ,    .true.    , .true. , 'yearly'   , 'SST_reshape_WOA09_REG1toCREG025_bilin.nc'       , ''       , ''
+   sn_sss      = 'woa09_SAsss01-12_monthly_1deg_SA_CMA_drowned_Ex_L75_SM5'  ,        -12   ,  'SA'    ,    .true.    , .true. , 'yearly'   , 'SSS_reshape_WOA09_REG1toCREG025_bilin.nc'       , ''       , ''
    sn_coast    = 'dist_coast_CREG025_ct20190401'                        ,         0    , 'Tcoast'   ,    .false.   , .true. , 'yearly'   ,  ''      , '', ''
    ln_sssr_flt = .true.    ! use filtering of SSS model for sss restoring
    nn_shap_iter   =  100   ! number of iteration of the shapiro filter
@@ -626,11 +626,11 @@
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
-   bn_ssh =    'GLORYS12V1-CREG025.L75_SUBTROPGYRE_CLIM-1993-2020.1d_grid2D' ,  24   , 'sossheig' ,     .true.     , .true. ,  'yearly'  ,    ''    ,   ''     ,     ''
-   bn_u3d  =   'GLORYS12V1-CREG025.L75_SUBTROPGYRE_CLIM-1993-2020.1d_gridU'  ,  24   , 'vozocrtx' ,     .true.     , .true. ,  'yearly'  ,    ''    ,   ''     ,     ''
-   bn_v3d  =   'GLORYS12V1-CREG025.L75_SUBTROPGYRE_CLIM-1993-2020.1d_gridV'  ,  24   , 'vomecrty' ,     .true.     , .true. ,  'yearly'  ,    ''    ,   ''     ,     ''
-   bn_tem  =   'GLORYS12V1-CREG025.L75_SUBTROPGYRE_CLIM-1993-2020.1d_gridT'  ,  24   , 'votemper' ,     .true.     , .true. ,  'yearly'  ,    ''    ,   ''     ,     ''
-   bn_sal  =   'GLORYS12V1-CREG025.L75_SUBTROPGYRE_CLIM-1993-2020.1d_gridS'  ,  24   , 'vosaline' ,     .true.     , .true. ,  'yearly'  ,    ''    ,   ''     ,     ''
+   bn_ssh =    'GLORYS12V1-CREG025.L75_SUBTROPGYRE.1d_grid2D' ,  24   , 'sossheig' ,     .true.     , .false. ,  'yearly'  ,    ''    ,   ''     ,     ''
+   bn_u3d  =   'GLORYS12V1-CREG025.L75_SUBTROPGYRE.1d_gridU'  ,  24   , 'vozocrtx' ,     .true.     , .false. ,  'yearly'  ,    ''    ,   ''     ,     ''
+   bn_v3d  =   'GLORYS12V1-CREG025.L75_SUBTROPGYRE.1d_gridV'  ,  24   , 'vomecrty' ,     .true.     , .false. ,  'yearly'  ,    ''    ,   ''     ,     ''
+   bn_tem  =   'GLORYS12V1-CREG025.L75_SUBTROPGYRE.1d_gridCT' ,  24   , 'CT'       ,     .true.     , .false. ,  'yearly'  ,    ''    ,   ''     ,     ''
+   bn_sal  =   'GLORYS12V1-CREG025.L75_SUBTROPGYRE.1d_gridSA' ,  24   , 'SA'       ,     .true.     , .false. ,  'yearly'  ,    ''    ,   ''     ,     ''
 /
 !-----------------------------------------------------------------------
 &nambdy_dta    !  open boundaries - external data                       (see nam_bdy)
@@ -644,15 +644,15 @@
    !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
    !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
    !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
-   bn_ssh  =   'GLORYS12V1-CREG025.L75_BERING_CLIM-1993-2020.1d_grid2D'    ,  24   , 'sossheig' ,     .true.     , .true. ,  'yearly'  ,    ''    ,   ''     ,     ''
-   bn_u3d  =   'GLORYS12V1-CREG025.L75_BERING_CLIM-1993-2020.1d_gridU'     ,  24   , 'vozocrtx' ,     .true.     , .true. ,  'yearly'  ,    ''    ,   ''     ,     ''
-   bn_v3d  =   'GLORYS12V1-CREG025.L75_BERING_CLIM-1993-2020.1d_gridV'     ,  24   , 'vomecrty' ,     .true.     , .true. ,  'yearly'  ,    ''    ,   ''     ,     ''
-   bn_tem  =   'GLORYS12V1-CREG025.L75_BERING_CLIM-1993-2020.1d_gridT'     ,  24   , 'votemper' ,     .true.     , .true. ,  'yearly'  ,    ''    ,   ''     ,     ''
-   bn_sal  =   'GLORYS12V1-CREG025.L75_BERING_CLIM-1993-2020.1d_gridS'     ,  24   , 'vosaline' ,     .true.     , .true. ,  'yearly'  ,    ''    ,   ''     ,     ''
+   bn_ssh  =   'GLORYS12V1-CREG025.L75_BERING.1d_grid2D'    ,  24   , 'sossheig' ,     .true.     , .false. ,  'yearly'  ,    ''    ,   ''     ,     ''
+   bn_u3d  =   'GLORYS12V1-CREG025.L75_BERING.1d_gridU'     ,  24   , 'vozocrtx' ,     .true.     , .false. ,  'yearly'  ,    ''    ,   ''     ,     ''
+   bn_v3d  =   'GLORYS12V1-CREG025.L75_BERING.1d_gridV'     ,  24   , 'vomecrty' ,     .true.     , .false. ,  'yearly'  ,    ''    ,   ''     ,     ''
+   bn_tem  =   'GLORYS12V1-CREG025.L75_BERING.1d_gridCT'    ,  24   , 'CT'       ,     .true.     , .false. ,  'yearly'  ,    ''    ,   ''     ,     ''
+   bn_sal  =   'GLORYS12V1-CREG025.L75_BERING.1d_gridSA'    ,  24   , 'SA'       ,     .true.     , .false. ,  'yearly'  ,    ''    ,   ''     ,     ''
 !* for si3
-   bn_a_i  =   'GLORYS12V1-CREG025.L75_BERING_CLIM-1993-2020.1d_icemod'    ,  24   , 'ileadfra' ,     .true.     , .true. ,  'yearly'  ,    ''    ,   ''     ,     ''
-   bn_h_i  =   'GLORYS12V1-CREG025.L75_BERING_CLIM-1993-2020.1d_icemod'    ,  24   , 'iicethic' ,     .true.     , .true. ,  'yearly'  ,    ''    ,   ''     ,     ''
-   bn_h_s  =   'GLORYS12V1-CREG025.L75_BERING_CLIM-1993-2020.1d_icemod'    ,  24   , 'isnowthi' ,     .true.     , .true. ,  'yearly'  ,    ''    ,   ''     ,     ''
+   bn_a_i  =   'GLORYS12V1-CREG025.L75_BERING.1d_icemod'    ,  24   , 'ileadfra' ,     .true.     , .false. ,  'yearly'  ,    ''    ,   ''     ,     ''
+   bn_h_i  =   'GLORYS12V1-CREG025.L75_BERING.1d_icemod'    ,  24   , 'iicethic' ,     .true.     , .false. ,  'yearly'  ,    ''    ,   ''     ,     ''
+   bn_h_s  =   'GLORYS12V1-CREG025.L75_BERING.1d_icemod'    ,  24   , 'isnowthi' ,     .true.     , .false. ,  'yearly'  ,    ''    ,   ''     ,     ''
    bn_t_i      = 'NOT USED'              ,         24.       , 'sitemp'  ,    .true.   , .false.,  'daily'  ,    ''            ,   ''     ,     ''
    bn_t_s      = 'NOT USED'              ,         24.       , 'sntemp'  ,    .true.   , .false.,  'daily'  ,    ''            ,   ''     ,     ''
    bn_tsu      = 'NOT USED'              ,         24.       , 'sittop'  ,    .true.   , .false.,  'daily'  ,    ''            ,   ''     ,     ''
@@ -736,8 +736,8 @@
 !-----------------------------------------------------------------------
 &nameos        !   ocean Equation Of Seawater                           (default: NO selection)
 !-----------------------------------------------------------------------
-   ln_teos10   = .false.         !  = Use TEOS-10
-   ln_eos80    = .true.          !  = Use EOS80
+   ln_teos10   = .true.          !  = Use TEOS-10
+   ln_eos80    = .false.         !  = Use EOS80
    ln_seos     = .false.         !  = Use S-EOS (simplified Eq.)
                                  !
    !                     ! S-EOS coefficients (ln_seos=T):
@@ -1236,11 +1236,9 @@
    ln_listonly =  .false.  !  do nothing else than listing the best domain decompositions (with land domains suppression)
    !                       !  if T: the largest number of cores tested is defined by max(mppsize, jpni*jpnj)
    ln_nnogather =  .false. !  activate code to avoid mpi_allgather use at the northfold
-   jpni        =  0       !  number of processors following i (set automatically if < 1), see also ln_listonly = T
-   jpnj        =  0       !  number of processors following j (set automatically if < 1), see also ln_listonly = T
-!   jpni        =  14       !  number of processors following i (set automatically if < 1), see also ln_listonly = T
-!   jpnj        =  19       !  number of processors following j (set automatically if < 1), see also ln_listonly = T
-!   nn_hls      =   1       !  halo width (applies to both rows and columns)
+   jpni        =  14       !  number of processors following i (set automatically if < 1), see also ln_listonly = T
+   jpnj        =  19       !  number of processors following j (set automatically if < 1), see also ln_listonly = T
+   nn_hls      =   1       !  halo width (applies to both rows and columns)
    nn_comm     =   1       !  comm choice
 /
 !-----------------------------------------------------------------------
