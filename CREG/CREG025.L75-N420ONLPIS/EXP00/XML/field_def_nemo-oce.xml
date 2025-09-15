@@ -117,9 +117,11 @@ that are available in the tidal-forcing implementation (see
     <field id="e3t_vsum300"  field_ref="e3t_300"            grid_ref="grid_T_vsum"   detect_missing_value="true" />
     <field id="masscello"    long_name="Sea Water Mass per unit area"   standard_name="sea_water_mass_per_unit_area"   unit="kg/m2"   grid_ref="grid_T_3D"/>
     <field id="volcello"     long_name="Ocean Volume"                   standard_name="ocean_volume"   unit="m3"       grid_ref="grid_T_3D"/>
-    <field id="toce"         long_name="temperature"                         standard_name="sea_water_potential_temperature"   unit="degC"     grid_ref="grid_T_3D"/>
+    <field id="toce"         long_name="temperature"                         standard_name="sea_water_conservative_temperature" unit="degC"    grid_ref="grid_T_3D"/>
+    <!-- <field id="toce"         long_name="temperature"                    standard_name="sea_water_potential_temperature"   unit="degC"     grid_ref="grid_T_3D"/> -->
     <field id="toce_e3t"     long_name="temperature (thickness weighted)"                                                      unit="degC"     grid_ref="grid_T_3D" > toce * e3t </field >
-    <field id="soce"         long_name="salinity"                            standard_name="sea_water_practical_salinity"      unit="1e-3"     grid_ref="grid_T_3D"/>
+    <field id="soce"         long_name="salinity"                            standard_name="sea_water_absolute_salinity"       unit="1e-3"     grid_ref="grid_T_3D"/>
+    <!-- <field id="soce"         long_name="salinity"                       standard_name="sea_water_practical_salinity"      unit="1e-3"     grid_ref="grid_T_3D"/> -->
     <field id="soce_e3t"     long_name="salinity    (thickness weighted)"                                                      unit="1e-3"     grid_ref="grid_T_3D" > soce * e3t </field >
 
     <field id="toce_e3t_300"      field_ref="toce_e3t"          unit="degree_C"     grid_ref="grid_T_zoom_300"      detect_missing_value="true" />
