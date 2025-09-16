@@ -301,7 +301,7 @@ CONTAINS
                   !ENDIF
                   !trcdta_bdy(jn,ib)%trc => sf_trcobc(jl,ib)%fnow(:,1,:)
                   !trcdta_bdy(jn,ib)%rn_fac = rf_trofac(jl)
-                  slf_i(jl)    = sn_trcobc(ib)
+                  slf_i(jl)    = sn_trcobc(jn)
                   slf_i(jl)%clvar = TRIM(cn_tronam(jn))
                   rf_trofac(jl,ib) = rn_trofac(jn)
                                                 ALLOCATE( sf_trcobc(jl,ib)%fnow(nblen,1,jpk)   , STAT=ierr2 )
