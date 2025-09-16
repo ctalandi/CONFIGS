@@ -136,7 +136,6 @@
       <field id="sfxbri"       long_name="ice-ocean salt flux from brines"                              unit="kg/m2/s" />
       <field id="sfxres"       long_name="ice-ocean salt flux from undiagnosed processes"               unit="kg/m2/s" />
       <field id="sfxsub"       long_name="ice-ocean salt flux from ice sublimation"                     unit="kg/m2/s" />
-      <field id="sfx"          long_name="ice-ocean salt flux total"                                    unit="kg/m2/s" />
 
       <!-- mass fluxes -->
       <field id="vfxice"       long_name="ice-ocean mass flux from ice melt/growth (neg = growth)"      unit="kg/m2/s" />
@@ -188,15 +187,6 @@
       <field id="icedrift_mass" long_name="Ice mass drift (conservation check)"   unit="kg/m2/s" />
       <field id="icedrift_salt" long_name="Ice salt drift (conservation check)"   unit="kg/m2/s" />
       <field id="icedrift_heat" long_name="Ice heat drift (conservation check)"   unit="W/m2"    />
-
-      <!-- sbcssm variables -->
-      <field id="sst_m"    unit="degC" />
-      <field id="sss_m"    unit="psu"  />
-      <field id="ssu_m"    unit="m/s"  />
-      <field id="ssv_m"    unit="m/s"  />
-      <field id="ssh_m"    unit="m"    />
-      <field id="e3t_m"    unit="m"    />
-      <field id="frq_m"    unit="-"    />
 
       <!-- rheology convergence tests -->
       <field id="uice_cvg"   long_name="sea ice velocity convergence"      standard_name="sea_ice_velocity_convergence"      unit="m/s" />
