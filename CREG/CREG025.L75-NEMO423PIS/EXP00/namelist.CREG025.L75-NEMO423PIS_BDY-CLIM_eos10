@@ -51,11 +51,11 @@
       cn_ocerst_out = "<OCERST_OUT>"   !  suffix of ocean restart name (output)
       cn_ocerst_outdir = "<CN_OUT_OCERST>"      !  directory in which to write output ocean restarts
    nn_istate   =       0   !  output the initial state (1) or not (0)
-   ln_rst_list = .false.   !  output restarts at list of times using nn_stocklist (T) or at set frequency with nn_stock (F)
+   ln_rst_list = .true.    !  output restarts at list of times using nn_stocklist (T) or at set frequency with nn_stock (F)
    nn_stock    =       0   !  used only if ln_rst_list = F: output restart freqeuncy (modulo referenced to 1)
       !                          !    =  0 force to write restart files only at the end of the run
       !                          !    = -1 do not do any restart
-   nn_stocklist = 0,0,0,0,0,0,0,0,0,0 ! List of timesteps when a restart file is to be written
+   nn_stocklist = <NRST1>,<NRST2>,<NRST3>,0,0,0,0,0,0,0 ! List of timesteps when a restart file is to be written
    nn_write    =       0   !  used only if key_xios is not defined: output frequency (modulo referenced to nn_it000)
       !                          !    =  0 force to write output files only at the end of the run
       !                          !    = -1 do not do any output file
