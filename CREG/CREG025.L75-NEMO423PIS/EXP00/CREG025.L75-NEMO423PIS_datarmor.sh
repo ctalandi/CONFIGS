@@ -1,10 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=NEMO423PIS
 #SBATCH --partition=cpu
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=192
+#SBATCH --ntasks=192
 #SBATCH --mem=700G
-#SBATCH --time=09:00:00
+#SBATCH --time=24:00:00
 #SBATCH --output=./JOBS-OUT/NEMO423PIS.%j.out
 #SBATCH --error=./JOBS-OUT/NEMO423PIS.%j.err
 #SBATCH --mail-user=ctalandi@ifremer.fr
@@ -80,6 +79,7 @@ date
 
 date
 time mpirun -n ${n_nemo} ${prog1} : -n ${n_xios} ${prog2} >& output.mpi
+#time srun -n ${n_nemo} ${prog1} : -n ${n_xios} ${prog2} >& output.mpi
 date
                }
 # ---

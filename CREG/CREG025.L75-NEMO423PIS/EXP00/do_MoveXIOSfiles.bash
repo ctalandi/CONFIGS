@@ -1,14 +1,16 @@
 #!/bin/bash
 #set -xv
 
+module load DCM/4.2.3
+
 # This script has to be located into a CREG025.L75-CASE/CTL directory structure
 
 # Get the experiment name 
 CASE=`pwd | awk -F / '{print $6}' | awk -F - '{print $2}'`
 
 # Give as argument the first and last stream to treat (usually 1 stream corresponds to a single year)
-is=$2 
-ie=$3
+is=$1
+ie=$2
 
 for id in `seq ${is} ${ie} `; do cd ${SCRATCH}/CREG025.L75-${CASE}-XIOS.${id} ; dcmtk_mvnc2s ; cd ../ ; done
 
